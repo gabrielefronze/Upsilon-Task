@@ -8,7 +8,7 @@ int runTaskRatios (TString runMode="",TString analysisMode="",TString inputName=
 	inputOptions ="AOD";
 	softVersions ="aliphysics=vAN-20160510-1";
 	(analysisMode.Contains("local")) ? analysisOptions ="" : analysisOptions ="CENTR";
-	analysisOptions="CENTR";
+	//analysisOptions="CENTR";
 	taskOptions ="";
 
   gROOT->LoadMacro(gSystem->ExpandPathName("$TASKDIR/runTaskUtilities.C"));

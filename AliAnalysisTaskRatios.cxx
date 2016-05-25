@@ -3,7 +3,7 @@ using std::cout;
 using std::endl;
 
 #include "TH1.h"
-#include "TGraph.h"
+#include "TGraphAsymmErrors.h"
 #include "TMath.h"
 #include "TH1D.h"
 #include "TList.h"
@@ -189,6 +189,8 @@ void AliAnalysisTaskRatios::Terminate(Option_t *) {
 
   TCanvas *canv=new TCanvas("canv","canv");
 
+  TH1::SetDefaultSumw2(kTRUE);
+
   TH1D *histoApt=(TH1D*)fOutput->At(0);
   TH1D *histoLpt=(TH1D*)fOutput->At(1);
   TH1D *histoLpt253=(TH1D*)fOutput->At(2);
@@ -197,24 +199,24 @@ void AliAnalysisTaskRatios::Terminate(Option_t *) {
   TH1D *histoApt335=(TH1D*)fOutput->At(5);
   TH1D *histoLpt354=(TH1D*)fOutput->At(6);
   TH1D *histoApt354=(TH1D*)fOutput->At(7);
-  histoLpt->Rebin(8);
-  histoApt->Rebin(8);
-  histoLpt253->Rebin(8);
-  histoApt253->Rebin(8);
-  histoLpt335->Rebin(8);
-  histoApt335->Rebin(8);
-  histoLpt354->Rebin(8);
-  histoApt354->Rebin(8);
+  histoLpt->Rebin(25);
+  histoApt->Rebin(25);
+  histoLpt253->Rebin(25);
+  histoApt253->Rebin(25);
+  histoLpt335->Rebin(25);
+  histoApt335->Rebin(25);
+  histoLpt354->Rebin(25);
+  histoApt354->Rebin(25);
 
 
   TH1D *histoRatio=new TH1D("histoRatio","histoRatio",1000,0.,20.);
   TH1D *histoRatio253=new TH1D("histoRatio253","histoRatio253",1000,0.,20.);
   TH1D *histoRatio335=new TH1D("histoRatio335","histoRatio335",1000,0.,20.);
   TH1D *histoRatio354=new TH1D("histoRatio354","histoRatio354",1000,0.,20.);
-  histoRatio->Rebin(8);
-  histoRatio253->Rebin(8);
-  histoRatio335->Rebin(8);
-  histoRatio354->Rebin(8);
+  histoRatio->Rebin(25);
+  histoRatio253->Rebin(25);
+  histoRatio335->Rebin(25);
+  histoRatio354->Rebin(25);
   histoRatio->Divide(histoLpt,histoApt);
   histoRatio253->Divide(histoLpt253,histoApt253);
   histoRatio335->Divide(histoLpt335,histoApt335);
@@ -224,19 +226,40 @@ void AliAnalysisTaskRatios::Terminate(Option_t *) {
   histoRatio335->SetTitle("ratio 3.0-3.5");
   histoRatio354->SetTitle("ratio 3.5-4.0");
 
-  canv->Divide(2,2);
+  TGraphAsymmErrors *graphRatio=new TGraphAsymmErrors(histoLpt,histoApt);
+  TGraphAsymmErrors *graphRatio253=new TGraphAsymmErrors(histoLpt253,histoApt253);
+  TGraphAsymmErrors *graphRatio335=new TGraphAsymmErrors(histoLpt335,histoApt335);
+  TGraphAsymmErrors *graphRatio354=new TGraphAsymmErrors(histoLpt354,histoApt354);
+  graphRatio->SetTitle("integrated ratio");
+  graphRatio253->SetTitle("ratio 2.5-3.0");
+  graphRatio335->SetTitle("ratio 3.0-3.5");
+  graphRatio354->SetTitle("ratio 3.5-4.0");
+  graphRatio->SetMarkerStyle(20);
+  graphRatio->SetMarkerSize(0.1);
+  graphRatio253->SetMarkerStyle(20);
+  graphRatio253->SetMarkerSize(0.1);
+  graphRatio335->SetMarkerStyle(20);
+  graphRatio335->SetMarkerSize(0.1);
+  graphRatio354->SetMarkerStyle(20);
+  graphRatio354->SetMarkerSize(0.1);
+
+  canv->Divide(2,2,0,0);
   canv->cd(1);
   histoRatio->GetXaxis()->SetRangeUser(0.,20.);
-  histoRatio->Draw();
+  //histoRatio->Draw();
+  graphRatio->Draw("ap");
   canv->cd(2);
   histoRatio253->GetXaxis()->SetRangeUser(0.,20.);
-  histoRatio253->Draw();
+  //histoRatio253->Draw();
+  graphRatio253->Draw("ap");
   canv->cd(3);
   histoRatio335->GetXaxis()->SetRangeUser(0.,20.);
-  histoRatio335->Draw();
+  //histoRatio335->Draw();
+  graphRatio335->Draw("ap");
   canv->cd(4);
   histoRatio354->GetXaxis()->SetRangeUser(0.,20.);
-  histoRatio354->Draw();
+  //histoRatio354->Draw();
+  graphRatio354->Draw("ap");
 
   cout << "**********************" << endl;
   cout << "* Analysis completed *" << endl;
