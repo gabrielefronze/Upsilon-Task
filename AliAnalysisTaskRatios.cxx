@@ -199,24 +199,24 @@ void AliAnalysisTaskRatios::Terminate(Option_t *) {
   TH1D *histoApt335=(TH1D*)fOutput->At(5);
   TH1D *histoLpt354=(TH1D*)fOutput->At(6);
   TH1D *histoApt354=(TH1D*)fOutput->At(7);
-  histoLpt->Rebin(25);
-  histoApt->Rebin(25);
-  histoLpt253->Rebin(25);
-  histoApt253->Rebin(25);
-  histoLpt335->Rebin(25);
-  histoApt335->Rebin(25);
-  histoLpt354->Rebin(25);
-  histoApt354->Rebin(25);
+  histoLpt->Rebin(5);
+  histoApt->Rebin(5);
+  histoLpt253->Rebin(5);
+  histoApt253->Rebin(5);
+  histoLpt335->Rebin(5);
+  histoApt335->Rebin(5);
+  histoLpt354->Rebin(5);
+  histoApt354->Rebin(5);
 
 
   TH1D *histoRatio=new TH1D("histoRatio","histoRatio",1000,0.,20.);
   TH1D *histoRatio253=new TH1D("histoRatio253","histoRatio253",1000,0.,20.);
   TH1D *histoRatio335=new TH1D("histoRatio335","histoRatio335",1000,0.,20.);
   TH1D *histoRatio354=new TH1D("histoRatio354","histoRatio354",1000,0.,20.);
-  histoRatio->Rebin(25);
-  histoRatio253->Rebin(25);
-  histoRatio335->Rebin(25);
-  histoRatio354->Rebin(25);
+  histoRatio->Rebin(5);
+  histoRatio253->Rebin(5);
+  histoRatio335->Rebin(5);
+  histoRatio354->Rebin(5);
   histoRatio->Divide(histoLpt,histoApt);
   histoRatio253->Divide(histoLpt253,histoApt253);
   histoRatio335->Divide(histoLpt335,histoApt335);
