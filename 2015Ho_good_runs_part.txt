@@ -1,0 +1,9 @@
+
+Find;BasePath=/alice/data/2015/LHC15o/000245504/muon_calo_pass1/AOD/;FileName=AliAOD.root;
+Find;BasePath=/alice/data/2015/LHC15o/000245501/muon_calo_pass1/AOD/;FileName=AliAOD.root;
+Find;BasePath=/alice/data/2015/LHC15o/000245496/muon_calo_pass1/AOD/;FileName=AliAOD.root;
+Find;BasePath=/alice/data/2015/LHC15o/000245450/muon_calo_pass1/AOD/;FileName=AliAOD.root;
+Find;BasePath=/alice/data/2015/LHC15o/000244983/muon_calo_pass1/AOD/;FileName=AliAOD.root;
+Find;BasePath=/alice/data/2015/LHC15o/000244982/muon_calo_pass1/AOD/;FileName=AliAOD.root;
+Find;BasePath=/alice/data/2015/LHC15o/000244980/muon_calo_pass1/AOD/;FileName=AliAOD.root;
+Find;BasePath=/alice/data/2015/LHC15o/000244918/muon_calo_pass1/AOD/;FileName=AliAOD.root;

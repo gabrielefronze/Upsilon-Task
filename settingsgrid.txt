@@ -1,0 +1,6 @@
+grid                   #runtype specification: local, proof, grid or gridterminate (without space)
+full                   #gridmode specification: full,test,offline,submit,merge or terminate
+true                   #readAOD
+false                  #readMC
+false                  #embedding
+true                   #useplugin
