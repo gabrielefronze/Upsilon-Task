@@ -51,7 +51,7 @@ printf("Opening %s\n",inputFile.Data());
 TH1D *histo;
 histo = new TH1D("histo","histo",250,2.5,15.);
 Int_t ptbin;
-histo->Add((TH1D*) f->Get(histoName.Data()));  
+histo->Add((TH1D*) f->Get(histoName.Data()));
 printf("Using Histo= %s\n",histoName.Data());
 
 histo->Draw();
@@ -60,17 +60,17 @@ histo->Draw();
 // choose the JUpsilon tails
 //-----------------------------------------------------------------------
 
-Double_t cbalpha1; 
+Double_t cbalpha1;
 Double_t cbn1;
 Double_t cbalpha2;
 Double_t cbn2;
 
-cbalpha1=0.93; 
+cbalpha1=0.93;
 cbn1=2.27;
 cbalpha2=2.09;
-cbn2=2.78;  
+cbn2=2.78;
 
-printf("\nDouble CB tails:\n");   
+printf("\nDouble CB tails:\n");
 printf("\nAlpha1=%f N1=%f Alpha2=%f N2=%f\n",cbalpha1,cbn1,cbalpha2,cbn2);
 
 //-----------------------------------------------------------------------
@@ -99,11 +99,11 @@ for(int i=xxmin;i<xxmax;i++){
 //---------------------------------------------------------------------
 // 1st step: Bck fit
 //---------------------------------------------------------------------
-//Double_t par[12]={90000.,0.46,1.14,0.06,5000.,UpsilonMass,7.0e-02,1.00011e+00,Upsilon2SMass,1.68359e+00,Upsilon2SMass,0.01}; 
-Double_t par[12]={-1.e+03,-1.,1.e+01,+0.1,19.,UpsilonMass,10.0e-02,1.00011e+00,3.70078e+00,1.68359e+00,3.63002e+00,0.01}; 
+//Double_t par[12]={90000.,0.46,1.14,0.06,5000.,UpsilonMass,7.0e-02,1.00011e+00,Upsilon2SMass,1.68359e+00,Upsilon2SMass,0.01};
+Double_t par[12]={1.e+03,-1.,1.e+01,+0.1,19.,UpsilonMass,10.0e-02,1.00011e+00,3.70078e+00,1.68359e+00,3.63002e+00,0.01}; 
 TF1 *funcbck;
 ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(30000);
-funcbck = new TF1("funcbck",FuncBck,FitMin,FitMax,4); 
+funcbck = new TF1("funcbck",FuncBck,FitMin,FitMax,4);
 funcbck->SetParameter(0,par[0]);
 funcbck->SetParameter(1,par[1]);
 funcbck->SetParLimits(1,-10.,0.);
@@ -150,36 +150,36 @@ histo->Fit(funcUpsilon,"ELR");
 //---------------------------------------------------------------------
 // 3rd step: total fit
 //---------------------------------------------------------------------
-TF1 *functot = new TF1("functot",FuncTot,FitMin,FitMax,12); 
-functot->SetParameter(0,funcbck->GetParameter(0));   
+TF1 *functot = new TF1("functot",FuncTot,FitMin,FitMax,12);
+functot->SetParameter(0,funcbck->GetParameter(0));
 functot->SetParameter(1,funcbck->GetParameter(1));
-functot->SetParLimits(1,-10.,0.);   
-functot->SetParameter(2,funcbck->GetParameter(2));   
+functot->SetParLimits(1,-10.,0.);
+functot->SetParameter(2,funcbck->GetParameter(2));
 functot->SetParameter(3,funcbck->GetParameter(3));
-functot->SetParLimits(3,-10.,0.);   
-functot->SetParameter(4,funcUpsilon->GetParameter(4));   
+functot->SetParLimits(3,-10.,0.);
+functot->SetParameter(4,funcUpsilon->GetParameter(4));
 functot->FixParameter(5,UpsilonMass);
 //functot->SetParLimits(5,UpsilonMass-UpsilonMass*0.3,UpsilonMass+UpsilonMass*0.05);
 functot->SetParameter(6,0.07);
 
 if((strcmp(tailsfix,"yes")==0)){
-  functot->FixParameter(7,cbalpha1); 
-  functot->FixParameter(8,cbn1);     
-  functot->FixParameter(9,cbalpha2); 
-  functot->FixParameter(10,cbn2);     
+  functot->FixParameter(7,cbalpha1);
+  functot->FixParameter(8,cbn1);
+  functot->FixParameter(9,cbalpha2);
+  functot->FixParameter(10,cbn2);
 }  else if((strcmp(tailsfix,"no")==0)){
-  functot->SetParameter(7,cbalpha1); 
-  functot->SetParameter(8,cbn1);     
-  functot->SetParameter(9,cbalpha2); 
-  functot->SetParameter(10,cbn2);     
-  functot->SetParLimits(7,0.,cbalpha1*10); 
-  functot->SetParLimits(8,0.,cbn1*10);     
-  functot->SetParLimits(9,0.,cbalpha2*10); 
-  functot->SetParLimits(10,0.,cbn2*10);     
+  functot->SetParameter(7,cbalpha1);
+  functot->SetParameter(8,cbn1);
+  functot->SetParameter(9,cbalpha2);
+  functot->SetParameter(10,cbn2);
+  functot->SetParLimits(7,0.,cbalpha1*10);
+  functot->SetParLimits(8,0.,cbn1*10);
+  functot->SetParLimits(9,0.,cbalpha2*10);
+  functot->SetParLimits(10,0.,cbn2*10);
 }
 
-functot->SetParameter(11,0.01);   
-functot->SetParLimits(11,0.,1.);   
+functot->SetParameter(11,0.01);
+functot->SetParLimits(11,0.,1.);
 
 functot->SetLineColor(kBlue);
 functot->SetLineWidth(2);
@@ -220,35 +220,35 @@ printf("Chi2/ndf= %f\n",chi2/ndf);
 //------------------------------------------------------
 // plot fitting functions and compute uncertainties
 //------------------------------------------------------
-TF1 *Upsilonfix = new TF1("Upsilonfix",FuncUpsilon,FitMin,FitMax,12); 
+TF1 *Upsilonfix = new TF1("Upsilonfix",FuncUpsilon,FitMin,FitMax,12);
 Upsilonfix->SetParameter(0,functot->GetParameter(0));
 Upsilonfix->SetParameter(1,functot->GetParameter(1));
 Upsilonfix->SetParameter(2,functot->GetParameter(2));
-Upsilonfix->SetParameter(3,functot->GetParameter(3)); 
-Upsilonfix->SetParameter(4,functot->GetParameter(4));  
-Upsilonfix->SetParameter(5,functot->GetParameter(5));  
-Upsilonfix->SetParameter(6,functot->GetParameter(6));  
-Upsilonfix->SetParameter(7,functot->GetParameter(7));  
-Upsilonfix->SetParameter(8,functot->GetParameter(8));  
-Upsilonfix->SetParameter(9,functot->GetParameter(9));  
-Upsilonfix->SetParameter(10,functot->GetParameter(10));  
-Upsilonfix->SetParameter(11,functot->GetParameter(11));  
+Upsilonfix->SetParameter(3,functot->GetParameter(3));
+Upsilonfix->SetParameter(4,functot->GetParameter(4));
+Upsilonfix->SetParameter(5,functot->GetParameter(5));
+Upsilonfix->SetParameter(6,functot->GetParameter(6));
+Upsilonfix->SetParameter(7,functot->GetParameter(7));
+Upsilonfix->SetParameter(8,functot->GetParameter(8));
+Upsilonfix->SetParameter(9,functot->GetParameter(9));
+Upsilonfix->SetParameter(10,functot->GetParameter(10));
+Upsilonfix->SetParameter(11,functot->GetParameter(11));
 Upsilonfix->SetLineColor(kGreen);
 Upsilonfix->Draw("same");
 Double_t NUpsilon=Upsilonfix->Integral(FitMin,FitMax)/binWidth;
 
-TF1 *Upsilonfix2 = new TF1("Upsilonfix2",FuncUpsilon2,FitMin,FitMax,7); 
+TF1 *Upsilonfix2 = new TF1("Upsilonfix2",FuncUpsilon2,FitMin,FitMax,7);
 Upsilonfix2->SetParameter(0,functot->GetParameter(4));
 Upsilonfix2->SetParameter(1,functot->GetParameter(5));
 Upsilonfix2->SetParameter(2,functot->GetParameter(6));
-Upsilonfix2->SetParameter(3,functot->GetParameter(7)); 
-Upsilonfix2->SetParameter(4,functot->GetParameter(8));  
-Upsilonfix2->SetParameter(5,functot->GetParameter(9));  
-Upsilonfix2->SetParameter(6,functot->GetParameter(10));  
+Upsilonfix2->SetParameter(3,functot->GetParameter(7));
+Upsilonfix2->SetParameter(4,functot->GetParameter(8));
+Upsilonfix2->SetParameter(5,functot->GetParameter(9));
+Upsilonfix2->SetParameter(6,functot->GetParameter(10));
 Double_t Upsilonpar[7];
 for(int i=0;i<7;i++) {
   Upsilonpar[i]=functot->GetParameter(4+i);
-} 
+}
 Double_t ErrUpsilonCorrParam = Upsilonfix2->IntegralError(FitMin,FitMax,Upsilonpar,Upsilonmat)/binWidth;
 Double_t ErrNUpsilon=ErrUpsilonCorrParam;
 printf("\nUpsilon=%f \n",Upsilonfix2->Integral(FitMin,FitMax)/binWidth);
@@ -286,27 +286,27 @@ l5->SetTextSize(0.038);
 l5->SetTextFont(42);
 l5->Draw();
 
-TF1 *Upsilonpfix = new TF1("Upsilonpfix",FuncUpsilonP,FitMin,FitMax,12); 
-Upsilonpfix->SetParameter(4,functot->GetParameter(4));  
-Upsilonpfix->SetParameter(5,functot->GetParameter(5));  
-Upsilonpfix->SetParameter(6,functot->GetParameter(6));  
-Upsilonpfix->SetParameter(7,functot->GetParameter(7));  
-Upsilonpfix->SetParameter(8,functot->GetParameter(8)); 
-Upsilonpfix->SetParameter(9,functot->GetParameter(9)); 
-Upsilonpfix->SetParameter(10,functot->GetParameter(10)); 
-Upsilonpfix->SetParameter(11,functot->GetParameter(11)); 
+TF1 *Upsilonpfix = new TF1("Upsilonpfix",FuncUpsilonP,FitMin,FitMax,12);
+Upsilonpfix->SetParameter(4,functot->GetParameter(4));
+Upsilonpfix->SetParameter(5,functot->GetParameter(5));
+Upsilonpfix->SetParameter(6,functot->GetParameter(6));
+Upsilonpfix->SetParameter(7,functot->GetParameter(7));
+Upsilonpfix->SetParameter(8,functot->GetParameter(8));
+Upsilonpfix->SetParameter(9,functot->GetParameter(9));
+Upsilonpfix->SetParameter(10,functot->GetParameter(10));
+Upsilonpfix->SetParameter(11,functot->GetParameter(11));
 Upsilonpfix->SetLineColor(kAzure+6);
 Upsilonpfix->Draw("same");
 
-TF1 *Upsilonpfix2 = new TF1("Upsilonpfix2",FuncUpsilonP2,FitMin,FitMax,8); 
+TF1 *Upsilonpfix2 = new TF1("Upsilonpfix2",FuncUpsilonP2,FitMin,FitMax,8);
 Upsilonpfix2->SetParameter(0,functot->GetParameter(4));
 Upsilonpfix2->SetParameter(1,functot->GetParameter(5));
 Upsilonpfix2->SetParameter(2,functot->GetParameter(6));
-Upsilonpfix2->SetParameter(3,functot->GetParameter(7)); 
-Upsilonpfix2->SetParameter(4,functot->GetParameter(8));  
-Upsilonpfix2->SetParameter(5,functot->GetParameter(9));  
-Upsilonpfix2->SetParameter(6,functot->GetParameter(10));  
-Upsilonpfix2->SetParameter(7,functot->GetParameter(11));  
+Upsilonpfix2->SetParameter(3,functot->GetParameter(7));
+Upsilonpfix2->SetParameter(4,functot->GetParameter(8));
+Upsilonpfix2->SetParameter(5,functot->GetParameter(9));
+Upsilonpfix2->SetParameter(6,functot->GetParameter(10));
+Upsilonpfix2->SetParameter(7,functot->GetParameter(11));
 Double_t NUpsilonP = Upsilonpfix->Integral(FitMin,FitMax)/binWidth;
 
  Double_t Upsilonpmat[64];
@@ -318,7 +318,7 @@ Double_t NUpsilonP = Upsilonpfix->Integral(FitMin,FitMax)/binWidth;
  Double_t Upsilonppar[8];
  for(int i=0;i<8;i++) {
    Upsilonppar[i]=functot->GetParameter(4+i);
- } 
+ }
  Double_t ErrUpsilonPCorrParam = Upsilonpfix2->IntegralError(FitMin,FitMax,Upsilonppar,Upsilonpmat)/binWidth;
  Double_t ErrNUpsilonP=ErrUpsilonPCorrParam;
 
@@ -348,22 +348,22 @@ l30->SetTextSize(0.035);
 l30->SetTextFont(42);
 l30->Draw();
 
- TF1 *bckfix = new TF1("bckfix",FuncBck,FitMin,FitMax,4);  
- bckfix->SetParameter(0,functot->GetParameter(0));  
- bckfix->SetParameter(1,functot->GetParameter(1));  
- bckfix->SetParameter(2,functot->GetParameter(2));  
- bckfix->SetParameter(3,functot->GetParameter(3));  
+ TF1 *bckfix = new TF1("bckfix",FuncBck,FitMin,FitMax,4);
+ bckfix->SetParameter(0,functot->GetParameter(0));
+ bckfix->SetParameter(1,functot->GetParameter(1));
+ bckfix->SetParameter(2,functot->GetParameter(2));
+ bckfix->SetParameter(3,functot->GetParameter(3));
  bckfix->SetLineColor(kOrange);
  bckfix->Draw("same");
- 
+
  functot->Draw("same");
- 
+
  Double_t Sigma3Min=functot->GetParameter(5)-3.*functot->GetParameter(6);
  Double_t Sigma3Max=functot->GetParameter(5)+3.*functot->GetParameter(6);
  Double_t NUpsilon3Sigma= Upsilonfix->Integral(Sigma3Min,Sigma3Max)/binWidth;
  Double_t NBck3Sigma = bckfix->Integral(Sigma3Min,Sigma3Max)/binWidth;
  Double_t Significance = NUpsilon3Sigma/TMath::Sqrt(NUpsilon3Sigma+NBck3Sigma);
- 
+
  printf("S/B (3sigma)=%f\n",NUpsilon3Sigma/NBck3Sigma);
  printf("S/sqrt(S+B) (3sigma)=%f\n",Significance);
 
@@ -374,7 +374,7 @@ l30->Draw();
  Double_t NBckUpsilonP3Sigma = bckfix->Integral(Sigma3UpsilonPMin,Sigma3UpsilonPMax)/binWidth;
  printf("NUpsilonP3Sigma=%f ,NBckUpsilonP3Sigma=%f\n ",NUpsilonP3Sigma,NBckUpsilonP3Sigma);
  Double_t SignificanceUpsilonP = NUpsilonP3Sigma/TMath::Sqrt(NUpsilonP3Sigma+NBckUpsilonP3Sigma);
- 
+
  char text60[100];
 sprintf(text60,"S/B Upsilon(2S)(3#sigma) = %3.2f",NUpsilonP3Sigma/NBckUpsilonP3Sigma);
 TLatex *l40 = new TLatex(UpsilonMass+0.2,Upsilonfix2->Integral(FitMin,FitMax)/binWidth*0.2,text60);

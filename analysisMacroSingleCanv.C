@@ -52,14 +52,14 @@ void analysisMacroSingleCanv(){
 	Pad1->Divide(1,2,0.01,0.0);
 	Pad1->cd(1)->SetLogy();
 	TH1D *histoInvariantMassWithPDCA090FullRap=new TH1D("Invariant mass 0%-90% 2.5<eta<4.0 PDCA","Invariant mass 0%-90% 2.5<eta<4.0 PDCA",250,2.5,15.);
-	withPDCATree->Project("Invariant mass 0%-90% 2.5<eta<4.0 PDCA","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	withPDCATree->Project("Invariant mass 0%-90% 2.5<eta<4.0 PDCA","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassWithPDCA090FullRap->ShowPeaks();
 	histoInvariantMassWithPDCA090FullRap->Draw();
 	outputHistoFile->cd();
 	histoInvariantMassWithPDCA090FullRap->Write();
 
 	TH1D *histoInvariantMassNoPDCA090FullRap=new TH1D("Invariant mass 0%-90% 2.5<eta<4.0","Invariant mass 0%-90% 2.5<eta<4.0",250,2.5,15.);
-	noPDCATree->Project("Invariant mass 0%-90% 2.5<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	noPDCATree->Project("Invariant mass 0%-90% 2.5<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassNoPDCA090FullRap->ShowPeaks();
 	histoInvariantMassNoPDCA090FullRap->SetLineColor(kRed);
 	histoInvariantMassNoPDCA090FullRap->Draw("SAME");
@@ -89,9 +89,9 @@ void analysisMacroSingleCanv(){
 	noPDCATree->Project("All entries","dimuon_mass");
 //  histoInvariantMassNoPDCA->ShowPeaks();
 	histoInvariantMassNoPDCA->SetLineColor(kRed);
-	histoInvariantMassNoPDCA->Draw("SAME");  
+	histoInvariantMassNoPDCA->Draw("SAME");
 	outputHistoFile->cd();
-	histoInvariantMassNoPDCA->Write();  
+	histoInvariantMassNoPDCA->Write();
 
 ///////////////////////////////////////////////////////////////////
 	TCanvas *canvHistos020=new TCanvas("canvHistos020","canvHistos020");
@@ -100,19 +100,19 @@ void analysisMacroSingleCanv(){
 	Pad3->Divide(1,2,0.01,0.0);
 	Pad3->cd(1)->SetLogy();
 	TH1D *histoInvariantMassWithPDCA020FullRap=new TH1D("Invariant mass 0%-20% 2.5<eta<4.0 PDCA","Invariant mass 0%-20% 2.5<eta<4.0 PDCA",250,2.5,15.);
-	withPDCATree->Project("Invariant mass 0%-20% 2.5<eta<4.0 PDCA","dimuon_mass","enevt_centrality>0 && enevt_centrality<20 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	withPDCATree->Project("Invariant mass 0%-20% 2.5<eta<4.0 PDCA","dimuon_mass","enevt_centrality>0 && enevt_centrality<20 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassWithPDCA020FullRap->ShowPeaks();
 	histoInvariantMassWithPDCA020FullRap->Draw();
 	outputHistoFile->cd();
 	histoInvariantMassWithPDCA020FullRap->Write();
 
 	TH1D *histoInvariantMassNoPDCA020FullRap=new TH1D("Invariant mass 0%-20% 2.5<eta<4.0","Invariant mass 0%-20% 2.5<eta<4.0",250,2.5,15.);
-	noPDCATree->Project("Invariant mass 0%-20% 2.5<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<20 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	noPDCATree->Project("Invariant mass 0%-20% 2.5<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<20 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassNoPDCA020FullRap->ShowPeaks();
 	histoInvariantMassNoPDCA020FullRap->SetLineColor(kRed);
-	histoInvariantMassNoPDCA020FullRap->Draw("SAME");  
+	histoInvariantMassNoPDCA020FullRap->Draw("SAME");
 	outputHistoFile->cd();
-	histoInvariantMassNoPDCA020FullRap->Write();  
+	histoInvariantMassNoPDCA020FullRap->Write();
 
 	Pad3->cd(2);
 	TH1D *histoInvariantMass020FullRapRatio=new TH1D("Ratio PDCA/NoPDCA 0%-20% 2.5<eta<4.0","Invariant mass 0%-20% 2.5<eta<4.0 PDCA",250,2.5,15.);
@@ -130,19 +130,19 @@ void analysisMacroSingleCanv(){
 	Pad4->Divide(1,2,0.01,0.0);
 	Pad4->cd(1)->SetLogy();
 	TH1D *histoInvariantMassWithPDCA2090FullRap=new TH1D("20%-90% 2.5<eta<4.0 PDCA","20%-90% 2.5<eta<4.0 PDCA",250,2.5,15.);
-	withPDCATree->Project("20%-90% 2.5<eta<4.0 PDCA","dimuon_mass","enevt_centrality>20 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	withPDCATree->Project("20%-90% 2.5<eta<4.0 PDCA","dimuon_mass","enevt_centrality>20 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassWithPDCA2090FullRap->ShowPeaks();
 	histoInvariantMassWithPDCA2090FullRap->Draw();
 	outputHistoFile->cd();
 	histoInvariantMassWithPDCA2090FullRap->Write();
 
 	TH1D *histoInvariantMassNoPDCA2090FullRap=new TH1D("20%-90% 2.5<eta<4.0","20%-90% 2.5<eta<4.0",250,2.5,15.);
-	noPDCATree->Project("20%-90% 2.5<eta<4.0","dimuon_mass","enevt_centrality>20 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	noPDCATree->Project("20%-90% 2.5<eta<4.0","dimuon_mass","enevt_centrality>20 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassNoPDCA2090FullRap->ShowPeaks();
 	histoInvariantMassNoPDCA2090FullRap->SetLineColor(kRed);
-	histoInvariantMassNoPDCA2090FullRap->Draw("SAME");  
+	histoInvariantMassNoPDCA2090FullRap->Draw("SAME");
 	outputHistoFile->cd();
-	histoInvariantMassNoPDCA2090FullRap->Write();  
+	histoInvariantMassNoPDCA2090FullRap->Write();
 
 	Pad4->cd(2);
 	TH1D *histoInvariantMass2090FullRapRatio=new TH1D("20%-90% 2.5<eta<4.0","20%-90% 2.5<eta<4.0 PDCA",250,2.5,15.);
@@ -160,14 +160,14 @@ void analysisMacroSingleCanv(){
 	Pad5->Divide(1,2,0.01,0.0);
 	Pad5->cd(1)->SetLogy();
 	TH1D *histoInvariantMassWithPDCA090SecondRap=new TH1D("Invariant mass 0%-90% 2.5<eta<3.2 PDCA","Invariant mass 0%-90% 2.5<eta<3.2 PDCA",250,2.5,15.);
-	withPDCATree->Project("Invariant mass 0%-90% 2.5<eta<3.2 PDCA","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-3.2 && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	withPDCATree->Project("Invariant mass 0%-90% 2.5<eta<3.2 PDCA","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-3.2 && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassWithPDCA090SecondRap->ShowPeaks();
 	histoInvariantMassWithPDCA090SecondRap->Draw();
 	outputHistoFile->cd();
 	histoInvariantMassWithPDCA090SecondRap->Write();
 
 	TH1D *histoInvariantMassNoPDCA090SecondRap=new TH1D("Invariant mass 0%-90% 2.5<eta<3.2","Invariant mass 0%-90% 2.5<eta<3.2",250,2.5,15.);
-	noPDCATree->Project("Invariant mass 0%-90% 2.5<eta<3.2","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-3.2 && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	noPDCATree->Project("Invariant mass 0%-90% 2.5<eta<3.2","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-3.2 && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassNoPDCA090SecondRap->ShowPeaks();
 	histoInvariantMassNoPDCA090SecondRap->SetLineColor(kRed);
 	histoInvariantMassNoPDCA090SecondRap->Draw("SAME");
@@ -190,14 +190,14 @@ void analysisMacroSingleCanv(){
 	Pad6->Divide(1,2,0.01,0.0);
 	Pad6->cd(1)->SetLogy();
 	TH1D *histoInvariantMassWithPDCA090FirstRap=new TH1D("Invariant mass 0%-90% 3.2<eta<4.0 PDCA","Invariant mass 0%-90% 3.2<eta<4.0 PDCA",250,2.5,15.);
-	withPDCATree->Project("Invariant mass 0%-90% 3.2<eta<4.0 PDCA","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-3.2 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	withPDCATree->Project("Invariant mass 0%-90% 3.2<eta<4.0 PDCA","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-3.2 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassWithPDCA090FirstRap->ShowPeaks();
 	histoInvariantMassWithPDCA090FirstRap->Draw();
 	outputHistoFile->cd();
 	histoInvariantMassWithPDCA090FirstRap->Write();
 
 	TH1D *histoInvariantMassNoPDCA090FirstRap=new TH1D("Invariant mass 0%-90% 3.2<eta<4.0","Invariant mass 0%-90% 3.2<eta<4.0",250,2.5,15.);
-	noPDCATree->Project("Invariant mass 0%-90% 3.2<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-3.2 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.");
+	noPDCATree->Project("Invariant mass 0%-90% 3.2<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-3.2 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2. && dimuon_transverse_momentum<12.");
 //  histoInvariantMassNoPDCA090FirstRap->ShowPeaks();
 	histoInvariantMassNoPDCA090FirstRap->SetLineColor(kRed);
 	histoInvariantMassNoPDCA090FirstRap->Draw("SAME");

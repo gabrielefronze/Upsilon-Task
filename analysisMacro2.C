@@ -16,7 +16,7 @@ void analysisMacro2(){
 	TFile *withPDCAFile=new TFile("full_analysis_outputs/withPDCA175/AnalysisResults.root","READ");
 	TFile *noPDCAFile=new TFile("full_analysis_outputs/noPDCA/AnalysisResults.root","READ");
 
-	TFile *outputHistoFile=new TFile("outputHistosLardeaux.root","RECREATE");
+	TFile *outputHistoFile=new TFile("outputHistosLardeaux175.root","RECREATE");
 
 
 	TList *withPDCAProcessedNumberList;
@@ -48,13 +48,14 @@ void analysisMacro2(){
 
 	for(Int_t iCentrality=0; iCentrality<4; iCentrality++){
 		///////////////////////////////////////////////////////////////////
+		printf("%d-%d 2.5<eta<4.0 PDCA\n",centralityBins[iCentrality],centralityBins[iCentrality+1]);
 		TH1D *histoPDCA=new TH1D(Form("%d-%d 2.5<eta<4.0 PDCA",centralityBins[iCentrality],centralityBins[iCentrality+1]),Form("%d-%d 2.5<eta<4.0 PDCA",centralityBins[iCentrality],centralityBins[iCentrality+1]),250,2.5,15.);
-		withPDCATree->Project(Form("%d-%d 2.5<eta<4.0 PDCA",centralityBins[iCentrality],centralityBins[iCentrality+1]),"dimuon_mass",Form("enevt_centrality>%d && enevt_centrality<%d && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.",centralityBins[iCentrality],centralityBins[iCentrality+1]));
+		withPDCATree->Project(Form("%d-%d 2.5<eta<4.0 PDCA",centralityBins[iCentrality],centralityBins[iCentrality+1]),"dimuon_mass",Form("enevt_centrality>%d && enevt_centrality<%d && dimuon_transverse_momentum<12. && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2.",centralityBins[iCentrality],centralityBins[iCentrality+1]));
 		outputHistoFile->cd();
 		histoPDCA->Write();
 
 		TH1D *histoNoPDCA=new TH1D(Form("%d-%d 2.5<eta<4.0",centralityBins[iCentrality],centralityBins[iCentrality+1]),Form("%d-%d 2.5<eta<4.0",centralityBins[iCentrality],centralityBins[iCentrality+1]),250,2.5,15.);
-		noPDCATree->Project(Form("%d-%d 2.5<eta<4.0",centralityBins[iCentrality],centralityBins[iCentrality+1]),"dimuon_mass",Form("enevt_centrality>%d && enevt_centrality<%d && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.",centralityBins[iCentrality],centralityBins[iCentrality+1]));
+		noPDCATree->Project(Form("%d-%d 2.5<eta<4.0",centralityBins[iCentrality],centralityBins[iCentrality+1]),"dimuon_mass",Form("enevt_centrality>%d && enevt_centrality<%d && dimuon_transverse_momentum<12. && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2.",centralityBins[iCentrality],centralityBins[iCentrality+1]));
 		histoNoPDCA->SetLineColor(kRed);
 		outputHistoFile->cd();
 		histoNoPDCA->Write();
@@ -68,10 +69,11 @@ void analysisMacro2(){
 		TCanvas *canv=new TCanvas(Form("canvas %d-%d 2.5<eta<4.0",centralityBins[iCentrality],centralityBins[iCentrality+1]),Form("canvas %d-%d 2.5<eta<4.0",centralityBins[iCentrality],centralityBins[iCentrality+1]));
 		canv->Divide(1,2);
 		canv->cd(1)->SetLogy();
-		histoPDCA->DrawClone();
-		histoNoPDCA->DrawClone("SAME");
+		histoPDCA->Draw();
+		histoNoPDCA->Draw("SAME");
 		canv->cd(2);
-		histoRatio->DrawClone();
+		histoRatio->Draw();
+		//canv->Draw();
 		outputHistoFile->cd();
 		canv->Write();
 
@@ -83,13 +85,14 @@ void analysisMacro2(){
 
 	for(Int_t iCentrality=1; iCentrality<4; iCentrality++){
 		///////////////////////////////////////////////////////////////////
+		printf("%d-%d 2.5<eta<4.0 PDCA\n",centralityBins[0],centralityBins[iCentrality+1]);
 		TH1D *histoPDCA=new TH1D(Form("%d-%d 2.5<eta<4.0 PDCA",centralityBins[0],centralityBins[iCentrality+1]),Form("%d-%d 2.5<eta<4.0 PDCA",centralityBins[0],centralityBins[iCentrality+1]),250,2.5,15.);
-		withPDCATree->Project(Form("%d-%d 2.5<eta<4.0 PDCA",centralityBins[0],centralityBins[iCentrality+1]),"dimuon_mass",Form("enevt_centrality>%d && enevt_centrality<%d && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.",centralityBins[0],centralityBins[iCentrality+1]));
+		withPDCATree->Project(Form("%d-%d 2.5<eta<4.0 PDCA",centralityBins[0],centralityBins[iCentrality+1]),"dimuon_mass",Form("enevt_centrality>%d && enevt_centrality<%d && dimuon_transverse_momentum<12. && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2.",centralityBins[0],centralityBins[iCentrality+1]));
 		outputHistoFile->cd();
 		histoPDCA->Write();
 
 		TH1D *histoNoPDCA=new TH1D(Form("%d-%d 2.5<eta<4.0",centralityBins[0],centralityBins[iCentrality+1]),Form("%d-%d 2.5<eta<4.0",centralityBins[0],centralityBins[iCentrality+1]),250,2.5,15.);
-		noPDCATree->Project(Form("%d-%d 2.5<eta<4.0",centralityBins[0],centralityBins[iCentrality+1]),"dimuon_mass",Form("enevt_centrality>%d && enevt_centrality<%d && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>0. && lowest_muon_transverse_momentum>0.",centralityBins[0],centralityBins[iCentrality+1]));
+		noPDCATree->Project(Form("%d-%d 2.5<eta<4.0",centralityBins[0],centralityBins[iCentrality+1]),"dimuon_mass",Form("enevt_centrality>%d && enevt_centrality<%d && dimuon_transverse_momentum<12. && dimuon_rapidity>-4. && dimuon_rapidity<-2.5 && highest_muon_transverse_momentum>2. && lowest_muon_transverse_momentum>2.",centralityBins[0],centralityBins[iCentrality+1]));
 		histoNoPDCA->SetLineColor(kRed);
 		outputHistoFile->cd();
 		histoNoPDCA->Write();
@@ -103,10 +106,10 @@ void analysisMacro2(){
 		TCanvas *canv=new TCanvas(Form("canvas %d-%d 2.5<eta<4.0",centralityBins[0],centralityBins[iCentrality+1]),Form("canvas %d-%d 2.5<eta<4.0",centralityBins[0],centralityBins[iCentrality+1]));
 		canv->Divide(1,2);
 		canv->cd(1)->SetLogy();
-		histoPDCA->DrawClone();
-		histoNoPDCA->DrawClone("SAME");
+		histoPDCA->Draw();
+		histoNoPDCA->Draw("SAME");
 		canv->cd(2);
-		histoRatio->DrawClone();
+		histoRatio->Draw();
 		outputHistoFile->cd();
 		canv->Write();
 
