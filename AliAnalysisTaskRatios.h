@@ -19,7 +19,7 @@ class AliAnalysisTaskRatios : public AliAnalysisTaskSE
 {
   public:
     virtual void NotifyRun();
-    
+
     AliAnalysisTaskRatios();
     AliAnalysisTaskRatios(const char *name, AliMuonTrackCuts *cuts);
     virtual ~AliAnalysisTaskRatios();
@@ -34,7 +34,7 @@ class AliAnalysisTaskRatios : public AliAnalysisTaskSE
     TList *fOutput; //!<TList output object
     AliMuonTrackCuts *fCuts;
     ULong64_t fNEvents;
-  
+
   ClassDef(AliAnalysisTaskRatios,1);
 };
 
