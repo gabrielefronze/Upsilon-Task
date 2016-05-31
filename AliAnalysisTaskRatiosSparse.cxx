@@ -77,7 +77,7 @@ void AliAnalysisTaskRatiosSparse::UserCreateOutputObjects()
   const Double_t xMin[kSparseDimension]={0.5,    0., 0.,   0.,   0.5};
   const Double_t xMax[kSparseDimension]={4.5,   12., 4., 100., 234.5};
 
-  THnSparse *sparse=new THnSparse("data_sparse","data_sparse",kSparseDimension,nBins,xMin,xMax,1);
+  THnSparseF *sparse=new THnSparseF("data_sparse","data_sparse",kSparseDimension,nBins,xMin,xMax);
   sparse->GetAxis(kTriggerFlag)->SetTitle("Trigger flag");
   sparse->GetAxis(kPt)->SetTitle("Pt");
   sparse->GetAxis(kRapidity)->SetTitle("Rapidity");
@@ -92,7 +92,7 @@ void AliAnalysisTaskRatiosSparse::UserCreateOutputObjects()
 
 void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 {
-  THnSparse *sparse=(THnSparse*)fOutput->At(0);
+  THnSparseF *sparse=(THnSparseF*)fOutput->At(0);
 
 	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
 
@@ -144,7 +144,7 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
     sparseData[kLocalBoard]=(Double_t)AliAnalysisMuonUtility::GetLoCircuit(muonBuffer);
 
     for(Int_t i=0; i<AliAnalysisMuonUtility::GetMatchTrigger(muonBuffer); i++){
-      sparseData[kTriggerFlag]=i+1;
+      sparseData[kTriggerFlag]=(Double_t)i+1.;
       sparse->Fill(sparseData);
     }
 

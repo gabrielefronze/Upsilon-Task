@@ -12,7 +12,7 @@
 #include "AliAnalysisTaskRatiosSparse.h"
 #endif
 
-AliAnalysisTaskRatiosSparse* AddTaskRatios(Bool_t isMC = kFALSE, TString changeName = "")
+AliAnalysisTaskRatiosSparse* AddTaskRatiosSparse(Bool_t isMC = kFALSE, TString changeName = "")
 {
   AliAnalysisManager *mgr = AliAnalysisManager::GetAnalysisManager();
   if (!mgr) {
