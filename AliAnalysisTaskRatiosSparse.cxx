@@ -188,12 +188,58 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
 
   cout<<"########## TERMINATE! ##########"<<endl;
 
-  fOutput=dynamic_cast<TList*>(GetOutputData(1));
-
-  TCanvas *canv=new TCanvas("canv","canv");
-
   TH1::SetDefaultSumw2(kTRUE);
 
+  fOutput=dynamic_cast<TList*>(GetOutputData(1));
+  THnSparseF *sparse=(THnSparseF*)fOutput->At(0);
+
+  const Int_t nBins=10;
+
+  Double_t lowRap=2.5;
+  Double_t hiRap=4.;
+  Double_t binWidth=(hiRap-lowRap)/nBins;
+
+  TH1D *histosAptBuffer;
+  TH1D *histosRatio[nBins];
+
+  for (Int_t i = 0; i < nBins; i++) {
+    Double_t binLow=lowRap+i*binWidth;
+    sparse->GetAxis(kRapidity)->SetRangeUser(binLow, binLow+binWidth);
+
+    sparse->GetAxis(kTriggerFlag)->SetRangeUser(1., 1.);
+    histosAptBuffer=sparse->Projection(kPt); // this is the Apt distribution
+    sparse->GetAxis(kTriggerFlag)->SetRangeUser(2., 2.);
+    histosRatio[i]=sparse->Projection(kPt); // this is the Lpt distribution
+    (histosRatio[i])->SetName(Form("Histo_ratio_%f-%f",binLow,binLow+binWidth));
+    (histosRatio[i])->SetTitle(Form("Histo ratio %f-%f",binLow,binLow+binWidth));
+    (histosRatio[i])->Divide(histosAptBuffer); // now this histogram contains the ratio of the two
+
+    delete histosAptBuffer;
+  }
+
+  Int_t canvasRows=0;
+  Int_t canvasColumns=0;
+
+  if ( nBins%2==0 ){
+    canvasRows=2;
+    canvasColumns=nBins/2;
+  } else {
+    if ( nBins%3==0 ){
+      canvasRows=3;
+      canvasColumns=nBins/3;
+    } else {
+      canvasRows=1;
+      canvasColumns=nBins;
+    }
+  }
+
+  TCanvas *canv=new TCanvas("canv","canv");
+  canv->Divide(canvasColumns,canvasRows);
+
+  for (nt_t i = 0; i < nBins; i++) {
+    canv->cd(i+1);
+    (histosRatio[i])->Draw();
+  }
 
   cout << "**********************" << endl;
   cout << "* Analysis completed *" << endl;
