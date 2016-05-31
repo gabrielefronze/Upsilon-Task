@@ -20,8 +20,8 @@ class AliAnalysisTaskRatiosSparse : public AliAnalysisTaskSE
   public:
     virtual void NotifyRun();
 
-    AliAnalysisTaskRatiosSparse();
-    AliAnalysisTaskRatiosSparse(const char *name, AliMuonTrackCuts *cuts);
+    AliAnalysisTaskRatiosSparse(Bool_t isMC);
+    AliAnalysisTaskRatiosSparse(const char *name, AliMuonTrackCuts *cuts, Bool_t isMC);
     virtual ~AliAnalysisTaskRatiosSparse();
 
     void UserCreateOutputObjects();
@@ -42,8 +42,9 @@ class AliAnalysisTaskRatiosSparse : public AliAnalysisTaskSE
       kLocalBoard,
       kSparseDimension
     };
+    Bool_t fIsMC;
 
-  ClassDef(AliAnalysisTaskRatiosSparse,1);
+  ClassDef(AliAnalysisTaskRatiosSparse,2);
 };
 
 #endif

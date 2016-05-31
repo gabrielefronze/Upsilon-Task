@@ -1,3 +1,5 @@
+TChain* CreateChain(const char *xmlfile, const char *type="ESD");
+
 const char *anatype = "AOD";
 
 void myAnalysis()
@@ -58,7 +60,7 @@ void myAnalysis()
    gSystem->Load("libPWGmuon");
 
 // analysis source to be compiled at runtime (if any)
-   gROOT->ProcessLine(".L AliAnalysisTaskRatios.cxx+g");
+   gROOT->ProcessLine(".L AliAnalysisTaskRatiosSparse.cxx+g");
 
 // read the analysis manager from file
    AliAnalysisManager *mgr = AliAnalysisAlien::LoadAnalysisManager("analysis.root");
@@ -73,7 +75,7 @@ void myAnalysis()
 }
 
 //________________________________________________________________________________
-TChain* CreateChain(const char *xmlfile, const char *type="ESD")
+TChain* CreateChain(const char *xmlfile, const char *type)
 {
 // Create a chain using url's from xml file
    TString filename;
@@ -84,7 +86,7 @@ TChain* CreateChain(const char *xmlfile, const char *type="ESD")
    printf("***************************************\n");
    printf("    Getting chain of trees %s\n", treename.Data());
    printf("***************************************\n");
-   TAlienCollection *coll = TAlienCollection::Open(xmlfile);
+   TAlienCollection *coll = dynamic_cast<TAlienCollection *>(TAlienCollection::Open(xmlfile));
    if (!coll) {
       ::Error("CreateChain", "Cannot create an AliEn collection from %s", xmlfile);
       return NULL;

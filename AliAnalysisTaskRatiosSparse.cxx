@@ -27,7 +27,7 @@ using std::endl;
 
 ClassImp(AliAnalysisTaskRatiosSparse)
 
-AliAnalysisTaskRatiosSparse::AliAnalysisTaskRatiosSparse() :
+AliAnalysisTaskRatiosSparse::AliAnalysisTaskRatiosSparse(Bool_t isMC) :
   AliAnalysisTaskSE(""),
   fOutput(0x0)
 
@@ -35,19 +35,21 @@ AliAnalysisTaskRatiosSparse::AliAnalysisTaskRatiosSparse() :
   fCuts=new AliMuonTrackCuts();
   fCuts->SetAllowDefaultParams(kTRUE);
   fNEvents=0;
+  fIsMC=isMC;
 
   DefineInput(0,TChain::Class());
   DefineOutput(1,TList::Class());
 }
 
 
-AliAnalysisTaskRatiosSparse::AliAnalysisTaskRatiosSparse(const char *name, AliMuonTrackCuts *cuts) :
+AliAnalysisTaskRatiosSparse::AliAnalysisTaskRatiosSparse(const char *name, AliMuonTrackCuts *cuts, Bool_t isMC) :
   AliAnalysisTaskSE(name),
   fOutput(0x0)
 {
   fCuts=cuts;
   fCuts->SetAllowDefaultParams(kTRUE);
   fNEvents=0;
+  fIsMC=isMC;
 
   DefineInput(0,TChain::Class());
   DefineOutput(1,TList::Class());
@@ -92,6 +94,13 @@ void AliAnalysisTaskRatiosSparse::UserCreateOutputObjects()
 
 void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 {
+	if( !(InputEvent()->GetFiredTriggerClasses()).Contains("CINT7-B-NOPF-MUFAST") ){
+		cout<<"-> Rejected because of trigger class selection."<<endl;
+		return;
+	} else {
+		cout<<"-> Accepted after applying trigger class selection"<<endl;
+	}
+
   THnSparseF *sparse=(THnSparseF*)fOutput->At(0);
 
 	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
@@ -100,55 +109,71 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 
   Double_t sparseData[kSparseDimension]={0.,0.,0.,0.,0.};
 
-	if( !(InputEvent()->GetFiredTriggerClasses()).Contains("CINT7-B-NOPF-MUFAST") ){
-		cout<<"-> Rejected because of trigger class selection."<<endl;
-		return;
-	} else {
-		cout<<"-> Accepted after applying trigger class selection"<<endl;
-	}
-
   // reading how much tracks are stored in the input event and the event centrality
   Int_t ntracks=AliAnalysisMuonUtility::GetNTracks(InputEvent());
   AliMultSelection *multSelection = static_cast<AliMultSelection*>(InputEvent()->FindListObject("MultSelection"));
   Double_t eventCentrality=multSelection->GetMultiplicityPercentile("V0M");
 
   // loop over the tracks to store only muon ones to obtain every possible dimuon
-  AliAODTrack* muonBuffer=0x0;
+  AliAODTrack* muonBufferData=0x0;
+  AliAODTrack* muonBufferMC=0x0;
+  AliAODTrack* motherBufferMC=0x0;
   for(Int_t itrack=0;itrack<ntracks;itrack++){
-    muonBuffer=(AliAODTrack*)AliAnalysisMuonUtility::GetTrack(itrack,InputEvent());
+    muonBufferData=(AliAODTrack*)AliAnalysisMuonUtility::GetTrack(itrack,InputEvent());
+
+    if( fIsMC){ // if the analysed run is a MC run the macro excludes any particle not recognized as a muon from upsilon
+      Int_t mcDaughterIndex=muonBufferData->GetLabel();
+      Int_t mcMotherIndex=0;
+
+      // check if there's any MC truth info related to the particle iTrack
+      if ( mcDaughterIndex<0.) continue; // this particle has no MC truth information
+      else {
+        muonBufferMC=MCEvent()->GetTrack(mcDaughterIndex);
+
+        // check for particle identity
+        if ( muonBufferMC->PdgCode()!=13 ) continue; // this particle is not a muon
+        else {
+          mcMotherIndex=muonBufferMC->GetMother();
+          motherBufferMC=MCEvent()->GetTrack(mcMotherIndex);
+
+          // check for particle mother identity
+          if ( motherBufferMC->PdgCode()!=553 ) continue; // the mother of the studied particle is not a upsilon
+        }
+      }
+    }
 
     // check if the track is seen in the muon tracker
-    if ( ! AliAnalysisMuonUtility::IsMuonTrack(muonBuffer) ) continue;
+    if ( ! AliAnalysisMuonUtility::IsMuonTrack(muonBufferData) ) continue;
 
     // Rapidity acceptance cut.
-    if ( muonBuffer->Eta()<-4.0 || muonBuffer->Eta()>-2.5) {
+    if ( muonBufferData->Eta()<-4.0 || muonBufferData->Eta()>-2.5) {
     	cout<<"Rejected (Eta)"<<endl;
     	continue;
     }
 
     // Rabs cut.
-    if ( muonBuffer->GetRAtAbsorberEnd()<17.6 || muonBuffer->GetRAtAbsorberEnd()>89.5) {
+    if ( muonBufferData->GetRAtAbsorberEnd()<17.6 || muonBufferData->GetRAtAbsorberEnd()>89.5) {
     	cout<<"Rejected (Rabs)"<<endl;
     	continue;
     }
 
     // is the track  selected via standard muon cuts?
-    if ( ! fCuts->IsSelected(muonBuffer) ) continue;
+    if ( ! fCuts->IsSelected(muonBufferData) ) continue;
 
-    Double_t pt=muonBuffer->Pt();
+    Double_t pt=muonBufferData->Pt();
 
-    sparseData[kRapidity]=(Double_t)-muonBuffer->Eta();
-    sparseData[kPt]=(Double_t)muonBuffer->Pt();
+    sparseData[kRapidity]=(Double_t)-muonBufferData->Eta();
+    sparseData[kPt]=(Double_t)muonBufferData->Pt();
     sparseData[kCentrality]=(Double_t)eventCentrality;
-    //sparseData[kTriggerFlag]=(Double_t)AliAnalysisMuonUtility::GetMatchTrigger(muonBuffer);
-    sparseData[kLocalBoard]=(Double_t)AliAnalysisMuonUtility::GetLoCircuit(muonBuffer);
+    //sparseData[kTriggerFlag]=(Double_t)AliAnalysisMuonUtility::GetMatchTrigger(muonBufferData);
+    sparseData[kLocalBoard]=(Double_t)AliAnalysisMuonUtility::GetLoCircuit(muonBufferData);
 
-    for(Int_t i=0; i<AliAnalysisMuonUtility::GetMatchTrigger(muonBuffer); i++){
+    for(Int_t i=0; i<AliAnalysisMuonUtility::GetMatchTrigger(muonBufferData); i++){
       sparseData[kTriggerFlag]=(Double_t)i+1.;
       sparse->Fill(sparseData);
     }
 
-    muonBuffer=0x0;
+    muonBufferData=0x0;
 
   }
 

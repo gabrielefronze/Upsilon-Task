@@ -47,7 +47,7 @@ void analysis_merge(const char *dir, Int_t stage=0)
    gSystem->Load("libPWGmuon");
 
 // Analysis source to be compiled at runtime (if any)
-   gROOT->ProcessLine(".L AliAnalysisTaskRatios.cxx+g");
+   gROOT->ProcessLine(".L AliAnalysisTaskRatiosSparse.cxx+g");
 
 // Connect to AliEn
    if (!TGrid::Connect("alien://")) return;
