@@ -67,8 +67,7 @@ AliAnalysisTaskRatiosSparse::~AliAnalysisTaskRatiosSparse()
 void AliAnalysisTaskRatiosSparse::NotifyRun()
 {
   printf("Setting run number for cuts\n");
-  if ( !fIsMC ) fCuts->SetRun(fInputHandler);
-  else fCuts->SetIsMC(fIsMC);
+  fCuts->SetRun(fInputHandler);
 }
 
 void AliAnalysisTaskRatiosSparse::UserCreateOutputObjects()
@@ -89,6 +88,8 @@ void AliAnalysisTaskRatiosSparse::UserCreateOutputObjects()
 
   fOutput->AddAt(sparse,0);
 
+  fCuts->SetIsMC(fIsMC);
+
   PostData(1,fOutput);
 }
 
@@ -98,17 +99,17 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 
   if( !fIsMC ){
   	if( !(InputEvent()->GetFiredTriggerClasses()).Contains("CINT7-B-NOPF-MUFAST") ){
-  		cout<<"-> Rejected because of trigger class selection."<<endl;
+  		//cout<<"-> Rejected because of trigger class selection."<<endl;
   		return;
   	} else {
-  		cout<<"-> Accepted after applying trigger class selection"<<endl;
+  		//cout<<"-> Accepted after applying trigger class selection"<<endl;
   	}
   }
 
-  cout<<"Loading THnSparse"<<endl;
+  ////cout<<"Loading THnSparse"<<endl;
   THnSparseF *sparse=(THnSparseF*)fOutput->At(0);
 
-	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
+	////cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
 
 	AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
 
@@ -117,10 +118,9 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
   // reading how much tracks are stored in the input event and the event centrality
   Int_t ntracks=AliAnalysisMuonUtility::GetNTracks(InputEvent());
   Double_t eventCentrality=0.;
-  if( !fIsMC ){
-    AliMultSelection *multSelection = static_cast<AliMultSelection*>(InputEvent()->FindListObject("MultSelection"));
-    eventCentrality=multSelection->GetMultiplicityPercentile("V0M");
-  }
+
+  AliMultSelection *multSelection = static_cast<AliMultSelection*>(InputEvent()->FindListObject("MultSelection"));
+  if ( multSelection ) eventCentrality=multSelection->GetMultiplicityPercentile("V0M");
 
   // loop over the tracks to store only muon ones to obtain every possible dimuon
   AliAODTrack* muonBufferData=0x0;
@@ -129,46 +129,48 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
   for(Int_t itrack=0;itrack<ntracks;itrack++){
     muonBufferData=(AliAODTrack*)AliAnalysisMuonUtility::GetTrack(itrack,InputEvent());
 
-    if( fIsMC ){ // if the analysed run is a MC run the macro excludes any particle not recognized as a muon from upsilon
+    // // check if the track is seen in the muon tracker
+    // if ( ! AliAnalysisMuonUtility::IsMuonTrack(muonBufferData) ) continue;
+    //
+    // // Rapidity acceptance cut.
+    // if ( muonBufferData->Eta()<-4.0 || muonBufferData->Eta()>-2.5) {
+    // 	//cout<<"Rejected (Eta)"<<endl;
+    // 	continue;
+    // }
+    //
+    // // Rabs cut.
+    // if ( muonBufferData->GetRAtAbsorberEnd()<17.6 || muonBufferData->GetRAtAbsorberEnd()>89.5) {
+    // 	//cout<<"Rejected (Rabs)"<<endl;
+    // 	continue;
+    // }
+
+    // is the track  selected via standard muon cuts?
+    if ( (!fCuts->IsSelected(muonBufferData))) continue;
+
+    // il kFALSE è perchè in realtà la scelta dell'origine dei muoni servirà più tardi (quando valuteremo il sistematico)
+    if( fIsMC && kFALSE ){ // if the analysed run is a MC run the macro excludes any particle not recognized as a muon from upsilon
       Int_t mcDaughterIndex=muonBufferData->GetLabel();
       Int_t mcMotherIndex=0;
 
       // check if there's any MC truth info related to the particle iTrack
-      if ( mcDaughterIndex<0.) continue; // this particle has no MC truth information
+      if ( mcDaughterIndex<0 ) continue; // this particle has no MC truth information
       else {
         muonBufferMC=MCEvent()->GetTrack(mcDaughterIndex);
 
         // check for particle identity
-        if ( muonBufferMC->PdgCode()!=13 ) continue; // this particle is not a muon
+        if ( TMath::Abs(muonBufferMC->PdgCode())!=13 ) continue; // this particle is not a muon
         else {
-          cout<<"It's a muon! Cheers!!!"<<endl;
+          //cout<<"It's a muon! Cheers!!!"<<endl;
           mcMotherIndex=muonBufferMC->GetMother();
+          if ( mcMotherIndex<0 ) continue;
           motherBufferMC=MCEvent()->GetTrack(mcMotherIndex);
 
           // check for particle mother identity
           if ( motherBufferMC->PdgCode()!=553 ) continue; // the mother of the studied particle is not a upsilon
-          else cout<<"And its mother is an Upsilon! Double cheers!!!"<<endl;
+          //else //cout<<"And its mother is an Upsilon! Double cheers!!!"<<endl;
         }
       }
     }
-
-    // check if the track is seen in the muon tracker
-    if ( ! AliAnalysisMuonUtility::IsMuonTrack(muonBufferData) ) continue;
-
-    // Rapidity acceptance cut.
-    if ( muonBufferData->Eta()<-4.0 || muonBufferData->Eta()>-2.5) {
-    	cout<<"Rejected (Eta)"<<endl;
-    	continue;
-    }
-
-    // Rabs cut.
-    if ( muonBufferData->GetRAtAbsorberEnd()<17.6 || muonBufferData->GetRAtAbsorberEnd()>89.5) {
-    	cout<<"Rejected (Rabs)"<<endl;
-    	continue;
-    }
-
-    // is the track  selected via standard muon cuts?
-    if ( (!fCuts->IsSelected(muonBufferData)) && !fIsMC ) continue;
 
     Double_t pt=muonBufferData->Pt();
 
@@ -189,7 +191,7 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 
   PostData(1,fOutput);
 
-  //cout<<"########## ANALYSIS DONE! ##########"<<endl;
+  ////cout<<"########## ANALYSIS DONE! ##########"<<endl;
 
   return;
 }
@@ -227,6 +229,7 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
     sparse->GetAxis(kTriggerFlag)->SetRangeUser(2., 2.);
     histosRatio[i]=sparse->Projection(kPt); // this is the Lpt distribution but will be divided by Apt
     histosRatio[i]->Rebin(rebinFactor);
+    histosRatio[i]->Sumw2();
 
     (histosRatio[i])->SetName(Form("Histo_ratio_%f-%f",binLow,binLow+binWidth));
     (histosRatio[i])->SetTitle(Form("Histo ratio %f-%f",binLow,binLow+binWidth));
