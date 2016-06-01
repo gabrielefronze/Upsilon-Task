@@ -66,7 +66,7 @@ void myAnalysis()
    AliAnalysisManager *mgr = AliAnalysisAlien::LoadAnalysisManager("analysis.root");
    if (!mgr) return;
    mgr->PrintStatus();
-   AliLog::SetGlobalLogLevel(AliLog::kError);
+   AliLog::SetGlobalLogLevel(AliLog::kWarning);
    TChain *chain = CreateChain("wn.xml", anatype);
 
    mgr->StartAnalysis("localfile", chain, 1234567890, 0);

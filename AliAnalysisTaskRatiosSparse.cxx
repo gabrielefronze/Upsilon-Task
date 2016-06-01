@@ -2,6 +2,7 @@
 using std::cout;
 using std::endl;
 
+#include "AliMCEvent.h"
 #include "TH1.h"
 #include "THnSparse.h"
 #include "TGraphAsymmErrors.h"
@@ -23,7 +24,6 @@ using std::endl;
 #include "AliMultSelection.h"
 #include "AliAnalysisTaskRatiosSparse.h"
 #include "AliMuonTrackCuts.h"
-
 
 ClassImp(AliAnalysisTaskRatiosSparse)
 
@@ -116,8 +116,8 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 
   // loop over the tracks to store only muon ones to obtain every possible dimuon
   AliAODTrack* muonBufferData=0x0;
-  AliAODTrack* muonBufferMC=0x0;
-  AliAODTrack* motherBufferMC=0x0;
+  AliVParticle* muonBufferMC=0x0;
+  AliVParticle* motherBufferMC=0x0;
   for(Int_t itrack=0;itrack<ntracks;itrack++){
     muonBufferData=(AliAODTrack*)AliAnalysisMuonUtility::GetTrack(itrack,InputEvent());
 
@@ -193,7 +193,7 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
   fOutput=dynamic_cast<TList*>(GetOutputData(1));
   THnSparseF *sparse=(THnSparseF*)fOutput->At(0);
 
-  const Int_t nBins=10;
+  const Int_t nBins=8;
 
   Double_t lowRap=2.5;
   Double_t hiRap=4.;
@@ -208,8 +208,10 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
 
     sparse->GetAxis(kTriggerFlag)->SetRangeUser(1., 1.);
     histosAptBuffer=sparse->Projection(kPt); // this is the Apt distribution
+
     sparse->GetAxis(kTriggerFlag)->SetRangeUser(2., 2.);
-    histosRatio[i]=sparse->Projection(kPt); // this is the Lpt distribution
+    histosRatio[i]=sparse->Projection(kPt); // this is the Lpt distribution but will be divided by Apt
+
     (histosRatio[i])->SetName(Form("Histo_ratio_%f-%f",binLow,binLow+binWidth));
     (histosRatio[i])->SetTitle(Form("Histo ratio %f-%f",binLow,binLow+binWidth));
     (histosRatio[i])->Divide(histosAptBuffer); // now this histogram contains the ratio of the two
@@ -236,7 +238,7 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
   TCanvas *canv=new TCanvas("canv","canv");
   canv->Divide(canvasColumns,canvasRows);
 
-  for (nt_t i = 0; i < nBins; i++) {
+  for (Int_t i = 0; i < nBins; i++) {
     canv->cd(i+1);
     (histosRatio[i])->Draw();
   }

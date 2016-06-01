@@ -6,4 +6,5 @@
 -I/Users/Gabriele/alice_sw/sw/osx_x86-64/ROOT/v5-34-30-alice-1/include
 -I/Users/Gabriele/alice_sw/sw/osx_x86-64/AliRoot/latest/include
 -I/Users/Gabriele/alice_sw/sw/osx_x86-64/AliPhysics/latest/include/
+-I/Users/Gabriele/alice_sw/alice-analysis-utils
 -Wall
