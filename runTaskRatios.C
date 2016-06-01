@@ -1,12 +1,12 @@
 int runTaskRatios (TString runMode="",TString analysisMode="",TString inputName="",TString inputOptions="",TString softVersions="",TString analysisOptions="",TString taskOptions=""){
 
-	runMode ="test";
+	runMode ="full";
 
-	analysisMode ="grid";
-	inputName ="Find;BasePath=/alice/cern.ch/user/a/alardeux/Sim/LHC15o/RealisticUps/Geant3_wVtx/MergedAOD/137runs/;FileName=AliAOD.Muons.root;";
+	analysisMode ="local";
+	//inputName ="Find;BasePath=/alice/cern.ch/user/a/alardeux/Sim/LHC15o/RealisticUps/Geant3_wVtx/MergedAOD/137runs/;FileName=AliAOD.Muons.root;";
 	//inputName ="2015Ho_good_runs_175.txt";
 	//inputName ="Find;BasePath=/alice/data/2015/LHC15o/000245766/muon_calo_pass1/AOD175/;FileName=AliAOD.root;";
-	//inputName ="AliAOD.root"s
+	inputName ="/Users/Gabriele/AliAOD.Muons.root";
 	inputOptions ="MC";
 	softVersions ="aliphysics=vAN-20160510-1";
 	(analysisMode.Contains("local")) ? analysisOptions ="" : analysisOptions ="CENTR";
@@ -29,8 +29,9 @@ int runTaskRatios (TString runMode="",TString analysisMode="",TString inputName=
   //gROOT->LoadMacro("$ALICE_PHYSICS/OADB/macros/AddTaskPhysicsSelection.C");
   //AliPhysicsSelectionTask* physSelTask = AddTaskPhysicsSelection(isMC);
 
+	AliAnalysisTaskRatiosSparse* taskMy = AddTaskRatiosSparse(isMC, "first");
+
 	if ( !isMC ){
-		AliAnalysisTaskRatiosSparse* taskMy = AddTaskRatiosSparse(isMC, "first");
 	  taskMy->SelectCollisionCandidates(AliVEvent::kMUSPB);
 	  //taskMy->SelectCollisionCandidates(AliVEvent::kMB | AliVEvent::kMUON);
 	}
