@@ -44,7 +44,7 @@ AliAnalysisTaskRatiosSparse* AddTaskRatiosSparse(Bool_t isMC = kFALSE, TString c
   TString taskName = "UpsilonTask" + changeName;
   AliMuonTrackCuts *muonCuts = new AliMuonTrackCuts("cuts","cuts");
   AliAnalysisTaskRatiosSparse *ratiosAnalysisTask = new AliAnalysisTaskRatiosSparse(taskName.Data(),muonCuts,isMC);
-  if ( isMC ) ratiosAnalysisTask->SetTrigClassPatterns("ANY");
+  //if ( isMC ) ratiosAnalysisTask->SetTrigClassPatterns("ANY");
   mgr->AddTask(ratiosAnalysisTask);
    // Connect containers
    mgr->ConnectInput  (ratiosAnalysisTask,  0, mgr->GetCommonInputContainer());

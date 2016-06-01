@@ -67,7 +67,8 @@ AliAnalysisTaskRatiosSparse::~AliAnalysisTaskRatiosSparse()
 void AliAnalysisTaskRatiosSparse::NotifyRun()
 {
   printf("Setting run number for cuts\n");
-  fCuts->SetRun(fInputHandler);
+  if ( !fIsMC ) fCuts->SetRun(fInputHandler);
+  else fCuts->SetIsMC(fIsMC);
 }
 
 void AliAnalysisTaskRatiosSparse::UserCreateOutputObjects()
@@ -94,13 +95,17 @@ void AliAnalysisTaskRatiosSparse::UserCreateOutputObjects()
 
 void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 {
-	if( !(InputEvent()->GetFiredTriggerClasses()).Contains("CINT7-B-NOPF-MUFAST") ){
-		cout<<"-> Rejected because of trigger class selection."<<endl;
-		return;
-	} else {
-		cout<<"-> Accepted after applying trigger class selection"<<endl;
-	}
 
+  if( !fIsMC ){
+  	if( !(InputEvent()->GetFiredTriggerClasses()).Contains("CINT7-B-NOPF-MUFAST") ){
+  		cout<<"-> Rejected because of trigger class selection."<<endl;
+  		return;
+  	} else {
+  		cout<<"-> Accepted after applying trigger class selection"<<endl;
+  	}
+  }
+
+  cout<<"Loading THnSparse"<<endl;
   THnSparseF *sparse=(THnSparseF*)fOutput->At(0);
 
 	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
@@ -111,8 +116,11 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 
   // reading how much tracks are stored in the input event and the event centrality
   Int_t ntracks=AliAnalysisMuonUtility::GetNTracks(InputEvent());
-  AliMultSelection *multSelection = static_cast<AliMultSelection*>(InputEvent()->FindListObject("MultSelection"));
-  Double_t eventCentrality=multSelection->GetMultiplicityPercentile("V0M");
+  Double_t eventCentrality=0.;
+  if( !fIsMC ){
+    AliMultSelection *multSelection = static_cast<AliMultSelection*>(InputEvent()->FindListObject("MultSelection"));
+    eventCentrality=multSelection->GetMultiplicityPercentile("V0M");
+  }
 
   // loop over the tracks to store only muon ones to obtain every possible dimuon
   AliAODTrack* muonBufferData=0x0;
@@ -121,7 +129,7 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
   for(Int_t itrack=0;itrack<ntracks;itrack++){
     muonBufferData=(AliAODTrack*)AliAnalysisMuonUtility::GetTrack(itrack,InputEvent());
 
-    if( fIsMC){ // if the analysed run is a MC run the macro excludes any particle not recognized as a muon from upsilon
+    if( fIsMC ){ // if the analysed run is a MC run the macro excludes any particle not recognized as a muon from upsilon
       Int_t mcDaughterIndex=muonBufferData->GetLabel();
       Int_t mcMotherIndex=0;
 
@@ -133,11 +141,13 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
         // check for particle identity
         if ( muonBufferMC->PdgCode()!=13 ) continue; // this particle is not a muon
         else {
+          cout<<"It's a muon! Cheers!!!"<<endl;
           mcMotherIndex=muonBufferMC->GetMother();
           motherBufferMC=MCEvent()->GetTrack(mcMotherIndex);
 
           // check for particle mother identity
           if ( motherBufferMC->PdgCode()!=553 ) continue; // the mother of the studied particle is not a upsilon
+          else cout<<"And its mother is an Upsilon! Double cheers!!!"<<endl;
         }
       }
     }
@@ -158,7 +168,7 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
     }
 
     // is the track  selected via standard muon cuts?
-    if ( ! fCuts->IsSelected(muonBufferData) ) continue;
+    if ( (!fCuts->IsSelected(muonBufferData)) && !fIsMC ) continue;
 
     Double_t pt=muonBufferData->Pt();
 
@@ -193,7 +203,11 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
   fOutput=dynamic_cast<TList*>(GetOutputData(1));
   THnSparseF *sparse=(THnSparseF*)fOutput->At(0);
 
-  const Int_t nBins=8;
+  // number of required rapidity bins
+  const Int_t nBins=10;
+
+  // how much rebin is needed?
+  const Int_t rebinFactor=8;
 
   Double_t lowRap=2.5;
   Double_t hiRap=4.;
@@ -208,9 +222,11 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
 
     sparse->GetAxis(kTriggerFlag)->SetRangeUser(1., 1.);
     histosAptBuffer=sparse->Projection(kPt); // this is the Apt distribution
+    histosAptBuffer->Rebin(rebinFactor);
 
     sparse->GetAxis(kTriggerFlag)->SetRangeUser(2., 2.);
     histosRatio[i]=sparse->Projection(kPt); // this is the Lpt distribution but will be divided by Apt
+    histosRatio[i]->Rebin(rebinFactor);
 
     (histosRatio[i])->SetName(Form("Histo_ratio_%f-%f",binLow,binLow+binWidth));
     (histosRatio[i])->SetTitle(Form("Histo ratio %f-%f",binLow,binLow+binWidth));

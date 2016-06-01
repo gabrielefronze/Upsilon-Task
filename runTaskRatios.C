@@ -1,13 +1,13 @@
 int runTaskRatios (TString runMode="",TString analysisMode="",TString inputName="",TString inputOptions="",TString softVersions="",TString analysisOptions="",TString taskOptions=""){
 
-	runMode ="full";
+	runMode ="terminate";
 
-	analysisMode ="local";
+	analysisMode ="grid";
 	//inputName ="Find;BasePath=/alice/cern.ch/user/a/alardeux/Sim/LHC15o/RealisticUps/Geant3_wVtx/MergedAOD/137runs/;FileName=AliAOD.Muons.root;";
-	//inputName ="2015Ho_good_runs_175.txt";
+	inputName ="2015Ho_good_runs_175.txt";
 	//inputName ="Find;BasePath=/alice/data/2015/LHC15o/000245766/muon_calo_pass1/AOD175/;FileName=AliAOD.root;";
-	inputName ="/Users/Gabriele/AliAOD.Muons.root";
-	inputOptions ="MC";
+	//inputName ="/Users/Gabriele/AliAOD.Muons.root";
+	inputOptions ="AOD";
 	softVersions ="aliphysics=vAN-20160510-1";
 	(analysisMode.Contains("local")) ? analysisOptions ="" : analysisOptions ="CENTR";
 	//analysisOptions="CENTR";
@@ -15,7 +15,7 @@ int runTaskRatios (TString runMode="",TString analysisMode="",TString inputName=
 
   gROOT->LoadMacro(gSystem->ExpandPathName("$TASKDIR/runTaskUtilities.C"));
 
-  SetupAnalysis(runMode,analysisMode,inputName,inputOptions,softVersions,analysisOptions, "libPWGmuon.so AliAnalysisTaskRatiosSparse.cxx AddTaskRatiosSparse.C",". $ALICE_ROOT/include $ALICE_PHYSICS/include","UpsiOutRatiosSparseSim");
+  SetupAnalysis(runMode,analysisMode,inputName,inputOptions,softVersions,analysisOptions, "libPWGmuon.so AliAnalysisTaskRatiosSparse.cxx AddTaskRatiosSparse.C",". $ALICE_ROOT/include $ALICE_PHYSICS/include","UpsilonTaskOutputRatiosSparse");
 
 	AliAnalysisAlien* plugin = static_cast<AliAnalysisAlien*>(AliAnalysisManager::GetAnalysisManager()->GetGridHandler()); // Uncomment it if you want to configure the plugin...
 	//plugin->SetGridWorkingDir("UpsiOutRatiosSparseSim");
