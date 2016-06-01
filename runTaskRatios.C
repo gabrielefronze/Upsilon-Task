@@ -40,5 +40,7 @@ int runTaskRatios (TString runMode="",TString analysisMode="",TString inputName=
 
   StartAnalysis(runMode,analysisMode,inputName,inputOptions);
 
+	cout<<ciao<<endl;
+
   return 0;
 }
