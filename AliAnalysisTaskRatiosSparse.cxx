@@ -33,7 +33,7 @@ AliAnalysisTaskRatiosSparse::AliAnalysisTaskRatiosSparse(Bool_t isMC) :
 
 {
   fCuts=new AliMuonTrackCuts();
-  fCuts->SetAllowDefaultParams(kTRUE)
+  fCuts->SetAllowDefaultParams(kTRUE);
   fNEvents=0;
   fIsMC=isMC;
 

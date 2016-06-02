@@ -43,17 +43,19 @@ Double_t FitFuncErfFixed ( Double_t* xVal, Double_t* par )
   return yVal;
 }
 
-void CreateHistrogramFromSparse(TString analysisResultPath, TString dataSparseName, TString MCSparseName){
+void CreateHistogramsFromSparse(TString dataAnalysisResultPath, TString dataSparseName, TString MCAnalysisResultPath, TString MCSparseName){
 
-  TFile *analysisResult = new TFile(Form("%s/AnalysisResults.root",analysisResultPath.Data()),"READ");
-  TFile *outputFile = new TFile(Form("%s/AptOverLptHistograms.root",analysisResultPath.Data()),"RECREATE");
-  if ( CheckTObjectPointer(analysisResult) ) return;
+  printf("Opening files... Output can be found in %s/AptOverLptHistograms.root\n",dataAnalysisResultPath.Data());
+  TFile *dataAnalysisResult = new TFile(Form("%s/AnalysisResults.root",dataAnalysisResultPath.Data()),"READ");
+  TFile *MCAnalysisResult = new TFile(Form("%s/AnalysisResults.root",MCAnalysisResultPath.Data()),"READ");
+  TFile *outputFile = new TFile(Form("%s/AptOverLptHistograms.root",dataAnalysisResultPath.Data()),"RECREATE");
+  if ( CheckTObjectPointer(dataAnalysisResult) ) return;
   if ( CheckTObjectPointer(outputFile) ) return;
 
-  THnSparse *dataSparse = static_cast<THnSparse*>(analysisResult->FindObject(dataSparseName));
+  printf("Retrieving THnSparses..\n");
+  THnSparse *dataSparse = static_cast<THnSparse*>(dataAnalysisResult->FindObject(dataSparseName));
   if ( CheckTObjectPointer(dataSparse) ) return;
-
-  THnSparse *MCSparse = static_cast<THnSparse*>(analysisResult->FindObject(MCSparseName));
+  THnSparse *MCSparse = static_cast<THnSparse*>(MCAnalysisResult->FindObject(MCSparseName));
   if ( CheckTObjectPointer(MCSparse) ) return;
 
   const Int_t numberOfRapidityBins=10;
@@ -63,11 +65,14 @@ void CreateHistrogramFromSparse(TString analysisResultPath, TString dataSparseNa
   Double_t rapidityHi=4.0;
   Double_t binWidth=(rapidityHi-rapidityLow)/numberOfRapidityBins;
 
+  printf("Analysis will be performed with %d bins in rapidity and a rebin of %d\n",numberOfRapidityBins,rebinFactor);
+
   TH1D *histosAptBuffer;
 
   TH1D *dataHistosRatio[numberOfRapidityBins];
   TF1 *dataFittingFunctions[numberOfRapidityBins];
 
+  printf("Creating histograms from real data\n");
   for (Int_t i = 0; i < numberOfRapidityBins; i++) {
     Double_t binLow=rapidityLow+i*binWidth;
     dataSparse->GetAxis(kRapidity)->SetRangeUser(binLow, binLow+binWidth);
@@ -95,6 +100,7 @@ void CreateHistrogramFromSparse(TString analysisResultPath, TString dataSparseNa
 
   TH1D *MCHistosRatio[numberOfRapidityBins];
 
+  printf("Creating histograms from MC data\n");
   for (Int_t i = 0; i < numberOfRapidityBins; i++) {
     Double_t binLow=rapidityLow+i*binWidth;
     MCSparse->GetAxis(kRapidity)->SetRangeUser(binLow, binLow+binWidth);
