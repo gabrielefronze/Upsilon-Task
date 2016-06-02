@@ -43,11 +43,14 @@ Double_t FitFuncErf ( Double_t* xVal, Double_t* par )
 
 void GetCorrectedMassSpectrum(TString fileName, TString histoName, Bool_t isMC){
   TFile *inputFile = new TFile(Form("UpsilonTaskOutputRatiosSparse/ResponseFunctions%s.root",((isMC)?"_MC":"_data")),"READ");
+  if ( !inputFile ) { cout<<"Fatal: the specified file can't be found."<<endl; return; }
+
   TH1D *histoToFit = new TH1D();
   histoToFit = dynamic_cast<TH1D*>(inputFile->FindObjectAny(histoName.Data()));
+  if ( !histoToFit ) { cout<<"Fatal: the specified histogram can't be found."<<endl; return; }
 
   TF1* fitFunc;
-  if ( isMC ) fitFunc = new TF1("fitFunc",FitFuncErf,0.,10.,7);
+  if ( isMC ) fitFunc = new TF1("fitFunc",FitFuncErfFixed,0.,10.,7);
   else fitFunc = new TF1("fitFunc",FitFuncErf,0.,10.,7);
 
   fitFunc->SetParameters(0.5, 1., 0.3, 1., 0.2, 0.1, 0.35);
