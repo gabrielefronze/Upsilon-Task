@@ -33,7 +33,7 @@ AliAnalysisTaskRatiosSparse::AliAnalysisTaskRatiosSparse(Bool_t isMC) :
 
 {
   fCuts=new AliMuonTrackCuts();
-  fCuts->SetAllowDefaultParams(kTRUE);
+  fCuts->SetAllowDefaultParams(kTRUE)
   fNEvents=0;
   fIsMC=isMC;
 
@@ -111,7 +111,7 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 
 	////cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
 
-	AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
+	//AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
 
   Double_t sparseData[kSparseDimension]={0.,0.,0.,0.,0.};
 
@@ -172,7 +172,7 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
       }
     }
 
-    Double_t pt=muonBufferData->Pt();
+    //Double_t pt=muonBufferData->Pt();
 
     sparseData[kRapidity]=(Double_t)-muonBufferData->Eta();
     sparseData[kPt]=(Double_t)muonBufferData->Pt();

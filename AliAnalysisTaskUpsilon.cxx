@@ -90,8 +90,7 @@ void AliAnalysisTaskUpsilon::UserCreateOutputObjects()
   sparseDimu->GetAxis(kCentrality)->SetTitle("Event centrality");
   sparseDimu->GetAxis(kMass)->SetTitle("Mass");
   sparseDimu->GetAxis(kHighMomentumMuonp)->SetTitle("Momentum of leading muon");
-  sparseDimu->GetAxis(kLowMomentumMuonp)->SetTitle("Momentum of second muon");
-
+  sparseDimu->GetAxis(kLowMomentumMuonp)->SetTitle("Momentum of second muon");  
 
   fOutput->AddAt(sparseDimu,0);
 
@@ -102,7 +101,7 @@ void AliAnalysisTaskUpsilon::UserCreateOutputObjects()
 void AliAnalysisTaskUpsilon::UserExec(Option_t *)
 {
 	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
-	AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
+	//AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
 	//cout<<eventInputHandler->IsEventSelected()<<endl;
 /*	Bool_t isSelected = (eventInputHandler->IsEventSelected());
 	if ( !isSelected ){
