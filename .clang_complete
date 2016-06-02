@@ -1,10 +1,11 @@
--I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/usr/include/
--I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/usr/include/c++/4.2.1
 -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/
 -I/usr/include
--I/usr/include/c++/*
+-I/usr/include/c++/4.2.1
+-I/usr/include/libxml2/libxml
+-I/Users/Gabriele/alice/root/alice_v5-34-30/inst/include
+-I/Users/Gabriele/alice/aliroot/master/inst/include
+-I/Users/Gabriele/alice/aliphysics/master/inst/include
 -I/Users/Gabriele/alice_sw/sw/osx_x86-64/ROOT/v5-34-30-alice-1/include
 -I/Users/Gabriele/alice_sw/sw/osx_x86-64/AliRoot/latest/include
 -I/Users/Gabriele/alice_sw/sw/osx_x86-64/AliPhysics/latest/include/
--I/Users/Gabriele/alice_sw/alice-analysis-utils
 -Wall
