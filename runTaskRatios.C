@@ -1,6 +1,6 @@
 int runTaskRatios (TString runMode="",TString analysisMode="",TString inputName="",TString inputOptions="",TString softVersions="",TString analysisOptions="",TString taskOptions=""){
 
-	runMode ="full";
+	runMode ="terminate";
 
 	analysisMode ="local";
 	//inputName ="Find;BasePath=/alice/cern.ch/user/a/alardeux/Sim/LHC15o/RealisticUps/Geant3_wVtx/MergedAOD/137runs/;FileName=AliAOD.Muons.root;";

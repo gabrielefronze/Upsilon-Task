@@ -223,13 +223,14 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
     sparse->GetAxis(kRapidity)->SetRangeUser(binLow, binLow+binWidth);
 
     sparse->GetAxis(kTriggerFlag)->SetRangeUser(1., 1.);
-    histosAptBuffer=sparse->Projection(kPt); // this is the Apt distribution
+    histosAptBuffer=sparse->Projection(kPt,"E"); // this is the Apt distribution
+    histosAptBuffer->Sumw2();
     histosAptBuffer->Rebin(rebinFactor);
 
     sparse->GetAxis(kTriggerFlag)->SetRangeUser(2., 2.);
-    histosRatio[i]=sparse->Projection(kPt); // this is the Lpt distribution but will be divided by Apt
-    histosRatio[i]->Rebin(rebinFactor);
+    histosRatio[i]=sparse->Projection(kPt,"E"); // this is the Lpt distribution but will be divided by Apt
     histosRatio[i]->Sumw2();
+    histosRatio[i]->Rebin(rebinFactor);
 
     (histosRatio[i])->SetName(Form("Histo_ratio_%f-%f",binLow,binLow+binWidth));
     (histosRatio[i])->SetTitle(Form("Histo ratio %f-%f",binLow,binLow+binWidth));
@@ -257,9 +258,13 @@ void AliAnalysisTaskRatiosSparse::Terminate(Option_t *) {
   TCanvas *canv=new TCanvas("canv","canv");
   canv->Divide(canvasColumns,canvasRows);
 
+  TFile *file=new TFile(Form("ResponseFunctions%s.root",((fIsMC)?"_MC":"_data")), "RECREATE");
+
   for (Int_t i = 0; i < nBins; i++) {
     canv->cd(i+1);
     (histosRatio[i])->Draw();
+    file->cd();
+    (histosRatio[i])->Write();
   }
 
   cout << "**********************" << endl;
