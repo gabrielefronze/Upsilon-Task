@@ -50,8 +50,7 @@ void GetCorrectedMassSpectrum(TString fileName, TString histoName, Bool_t isMC){
   if ( !histoToFit ) { cout<<"Fatal: the specified histogram can't be found."<<endl; return; }
 
   TF1* fitFunc;
-  if ( isMC ) fitFunc = new TF1("fitFunc",FitFuncErfFixed,0.,10.,7);
-  else fitFunc = new TF1("fitFunc",FitFuncErf,0.,10.,7);
+  fitFunc = new TF1("fitFunc",FitFuncErfFixed,0.,10.,7);
 
   fitFunc->SetParameters(0.5, 1., 0.3, 1., 0.2, 0.1, 0.35);
 
