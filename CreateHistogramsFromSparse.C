@@ -24,12 +24,16 @@ enum{
   kSparseDimension
 };
 
-Bool_t CheckTObjectPointer(TObject *obj){
+Int_t nChecks=0;
+
+Bool_t CheckTObjectPointer(void *input){
+  TObject *obj = (TObject*)input;
+  nChecks++;
   if ( !obj ) {
-    printf("FATAL: Pointer named %s of class %s is not valid.",obj->GetName(),obj->IsA()->GetName());
+    printf("FATAL: Pointer is not valid. (Call %d)",nChecks);
     return kTRUE;
   }
-  return kFALSE;
+  else return kFALSE;
 }
 
 Double_t FitFuncErfFixed ( Double_t* xVal, Double_t* par )
@@ -39,31 +43,44 @@ Double_t FitFuncErfFixed ( Double_t* xVal, Double_t* par )
   Double_t sqrtTwo = TMath::Sqrt(2.);
   Double_t yVal = 1.+par[0]*(TMath::Erf((currX-par[1])/par[2]/sqrtTwo)-1.);
   if ( xx < par[6] ) yVal += par[3]*(TMath::Erf((-xx-par[4])/par[5]/sqrtTwo) - TMath::Erf((-par[6]-par[4])/par[5]/sqrtTwo));
+  if ( xx > 6. ) yVal = 1.;
 
   return yVal;
 }
 
-void CreateHistogramsFromSparse(TString dataAnalysisResultPath, TString dataSparseName, TString MCAnalysisResultPath, TString MCSparseName){
+void CreateHistogramsFromSparse(TString dataAnalysisResultPath, TString MCAnalysisResultPath){
 
   printf("Opening files... Output can be found in %s/AptOverLptHistograms.root\n",dataAnalysisResultPath.Data());
   TFile *dataAnalysisResult = new TFile(Form("%s/AnalysisResults.root",dataAnalysisResultPath.Data()),"READ");
   TFile *MCAnalysisResult = new TFile(Form("%s/AnalysisResults.root",MCAnalysisResultPath.Data()),"READ");
   TFile *outputFile = new TFile(Form("%s/AptOverLptHistograms.root",dataAnalysisResultPath.Data()),"RECREATE");
-  if ( CheckTObjectPointer(dataAnalysisResult) ) return;
-  if ( CheckTObjectPointer(outputFile) ) return;
+  if ( CheckTObjectPointer(dataAnalysisResult) ) return; //1
+  if ( CheckTObjectPointer(outputFile) ) return; //2
+
+  TList *dataList;
+  dataAnalysisResult->GetObject("Upsilonfirst/UpsilonOutfirst",dataList);
+  if ( CheckTObjectPointer(dataList) ) return; //3
+  TList *MCList;
+  MCAnalysisResult->GetObject("Upsilonfirst/UpsilonOutfirst",MCList);
+  if ( CheckTObjectPointer(MCList) ) return; //4
 
   printf("Retrieving THnSparses..\n");
-  THnSparse *dataSparse = static_cast<THnSparse*>(dataAnalysisResult->FindObject(dataSparseName));
-  if ( CheckTObjectPointer(dataSparse) ) return;
-  THnSparse *MCSparse = static_cast<THnSparse*>(MCAnalysisResult->FindObject(MCSparseName));
-  if ( CheckTObjectPointer(MCSparse) ) return;
+  THnSparseF *dataSparse = (THnSparseF*)(dataList->FindObject("data_sparse"));
+  if ( CheckTObjectPointer(dataSparse) ) return; //5
+  THnSparseF *MCSparse = (THnSparseF*)(MCList->FindObject("data_sparse"));
+  if ( CheckTObjectPointer(MCSparse) ) return; //6
 
   const Int_t numberOfRapidityBins=10;
-  Int_t rebinFactor=10;
+  Int_t rebinFactor=25;
 
   Double_t rapidityLow=2.5;
   Double_t rapidityHi=4.0;
   Double_t binWidth=(rapidityHi-rapidityLow)/numberOfRapidityBins;
+
+  TAxis *rapidityAxis = new TAxis(numberOfRapidityBins, rapidityLow, rapidityHi);
+  rapidityAxis->SetName("rapidity_axis");
+  outputFile->cd();
+  rapidityAxis->Write();
 
   printf("Analysis will be performed with %d bins in rapidity and a rebin of %d\n",numberOfRapidityBins,rebinFactor);
 
@@ -99,6 +116,7 @@ void CreateHistogramsFromSparse(TString dataAnalysisResultPath, TString dataSpar
 
 
   TH1D *MCHistosRatio[numberOfRapidityBins];
+  TF1 *MCFittingFunctions[numberOfRapidityBins];
 
   printf("Creating histograms from MC data\n");
   for (Int_t i = 0; i < numberOfRapidityBins; i++) {
@@ -120,9 +138,9 @@ void CreateHistogramsFromSparse(TString dataAnalysisResultPath, TString dataSpar
 
     delete histosAptBuffer;
 
-    TF1* MCFittingFunction = new TF1(Form("dataFittingFunction_%d",i),FitFuncErfFixed,0.,10.,7);
-    MCFittingFunction->SetParameters(0.5, 1., 0.3, 1., 0.2, 0.1, 0.35);
-    MCFittingFunction->FixParameter(7, dataFittingFunctions[i]->GetParameter(7));
+    MCFittingFunctions[i] = new TF1(Form("MCFittingFunction_%d",i),FitFuncErfFixed,0.,10.,7);
+    MCFittingFunctions[i]->SetParameters(0.5, 1., 0.3, 1., 0.2, 0.1, 0.35);
+    MCFittingFunctions[i]->FixParameter(0, dataFittingFunctions[i]->GetParameter(0));
 
     // here the parameter obtained from data has to be fixed!
     (MCHistosRatio[i])->Fit(dataFittingFunctions[i],"RL");
@@ -155,6 +173,8 @@ void CreateHistogramsFromSparse(TString dataAnalysisResultPath, TString dataSpar
     outputFile->cd();
     (dataHistosRatio[iHistos])->Write();
     (MCHistosRatio[iHistos])->Write();
+    (dataFittingFunctions[iHistos])->Write();
+    (MCFittingFunctions[iHistos])->Write();
   }
 
 }
