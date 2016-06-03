@@ -21,7 +21,7 @@ class AliAnalysisTaskWeightedSpectrum : public AliAnalysisTaskSE
   public:
     virtual void NotifyRun();
 
-    AliAnalysisTaskWeightedSpectrum(Bool_t isMC, TString inputFileName, TString mode);
+    AliAnalysisTaskWeightedSpectrum();
     AliAnalysisTaskWeightedSpectrum(AliMuonTrackCuts *cuts, Bool_t isMC, TString inputFileName, TString mode);
     virtual ~AliAnalysisTaskWeightedSpectrum();
 
@@ -35,22 +35,17 @@ class AliAnalysisTaskWeightedSpectrum : public AliAnalysisTaskSE
     TList *fOutput; //!<TList output object
     AliMuonTrackCuts *fCuts;
     ULong64_t fNEvents;
-    TString fMode;
+    Bool_t fMode;
     TAxis *fRapidityAxis;
-    TObjArray *fInputResponseFunctions;
+    TObjArray *fInputResponseFunctionsMC;
+    TObjArray *fInputResponseFunctionsData;
 
     enum{
-        kMomentum,
         kTransverse,
         kRapidity,
-        kCentrality,
-        kPt1,
-        kPt2,
         kMass,
-        kWeight
     };
 
-    Float_t *fTreeData;
     Bool_t fIsMC;
 
   ClassDef(AliAnalysisTaskWeightedSpectrum,2);

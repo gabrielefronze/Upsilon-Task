@@ -1,6 +1,6 @@
 int runTaskWeights (TString runMode="",TString analysisMode="",TString inputName="",TString inputOptions="",TString softVersions="",TString analysisOptions="",TString taskOptions=""){
 
-	runMode ="full";
+	runMode ="terminate";
 
 	analysisMode ="local";
 	//inputName ="Find;BasePath=/alice/cern.ch/user/a/alardeux/Sim/LHC15o/RealisticUps/Geant3_wVtx/MergedAOD/137runs/;FileName=AliAOD.Muons.root;";
@@ -9,7 +9,7 @@ int runTaskWeights (TString runMode="",TString analysisMode="",TString inputName
 	inputName ="/Users/Gabriele/AliAOD.Muons.root";
 	inputOptions ="MC";
 	softVersions ="aliphysics=vAN-20160510-1";
-	(analysisMode.Contains("local")) ? analysisOptions ="" : analysisOptions ="CENTR";
+	(analysisMode.Contains("local")) ? analysisOptions ="NOPHYSSEL" : analysisOptions ="CENTR NOPHYSSEL";
 	//analysisOptions="CENTR";
 	taskOptions ="";
 
@@ -41,7 +41,7 @@ int runTaskWeights (TString runMode="",TString analysisMode="",TString inputName
 
 // AliMuonEventCuts* eventCuts = BuildMuonEventCuts(map); // Pre-configured AliMuonEventCuts
 // SetupMuonBasedTask(task,eventCuts,taskOptions,map); // Automatically setup "task" if it derives from AliVAnalysisMuon
-  cout<<"PIPPOOOOOO"<<endl;
+
   StartAnalysis(runMode,analysisMode,inputName,inputOptions);
 
   return 0;
