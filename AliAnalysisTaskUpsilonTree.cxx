@@ -20,61 +20,56 @@ using std::endl;
 #include "TLorentzVector.h"
 #include "AliAnalysisMuonUtility.h"
 #include "AliMultSelection.h"
-#include "AliAnalysisTaskUpsilonTreeTuned.h"
+#include "AliAnalysisTaskUpsilonTree.h"
 #include "AliMuonTrackCuts.h"
+#include "AliMCEvent.h"
 
 
-ClassImp(AliAnalysisTaskUpsilonTreeTuned
+ClassImp(AliAnalysisTaskUpsilonTree
 )
 
-AliAnalysisTaskUpsilonTreeTuned::AliAnalysisTaskUpsilonTreeTuned() :
+AliAnalysisTaskUpsilonTree::AliAnalysisTaskUpsilonTree() :
   AliAnalysisTaskSE(""),
-  fAODEvent(0x0),
-  fESDEvent(0x0),
-  fOutput(0x0)
+  fOutput(0x0),
+  fCuts(0x0),
+  fNEvents(0),
+  fTreeData(0x0)
 {
-  fCuts=new AliMuonTrackCuts();
-  fCuts->SetAllowDefaultParams(kTRUE);
-  fNEvents=0;
-  fTreeData=(Float_t*)malloc(kSparseDimension*sizeof(Float_t));
-
-  DefineInput(0,TChain::Class());
-  DefineOutput(1,TList::Class());
+  fIsMC=kFALSE;
 }
 
 
-AliAnalysisTaskUpsilonTreeTuned::AliAnalysisTaskUpsilonTreeTuned(const char *name, AliMuonTrackCuts *cuts) :
+AliAnalysisTaskUpsilonTree::AliAnalysisTaskUpsilonTree(const char *name, AliMuonTrackCuts *cuts, Bool_t isMC) :
   AliAnalysisTaskSE(name),
-  fAODEvent(0x0),
-  fESDEvent(0x0),
   fOutput(0x0)
 {
   fCuts=cuts;
   fCuts->SetAllowDefaultParams(kTRUE);
   fNEvents=0;
   fTreeData=(Float_t*)malloc(kSparseDimension*sizeof(Float_t));
+  fIsMC=isMC;
 
   DefineInput(0,TChain::Class());
   DefineOutput(1,TList::Class());
 }
 
 
-AliAnalysisTaskUpsilonTreeTuned::~AliAnalysisTaskUpsilonTreeTuned()
+AliAnalysisTaskUpsilonTree::~AliAnalysisTaskUpsilonTree()
 {
-  Info("~AliAnalysisTaskUpsilonTreeTuned","Calling Destructor");
+  Info("~AliAnalysisTaskUpsilonTree","Calling Destructor");
   if(fCuts)fCuts=0x0;
   if(fOutput)delete fOutput;
   if(fTreeData)delete fTreeData;
 }
 
 
-void AliAnalysisTaskUpsilonTreeTuned::NotifyRun()
+void AliAnalysisTaskUpsilonTree::NotifyRun()
 {
   printf("Setting run number for cuts\n");
   fCuts->SetRun(fInputHandler);
 }
 
-void AliAnalysisTaskUpsilonTreeTuned::UserCreateOutputObjects()
+void AliAnalysisTaskUpsilonTree::UserCreateOutputObjects()
 {
   fOutput = new TList();
   fOutput->SetOwner();
@@ -94,7 +89,7 @@ void AliAnalysisTaskUpsilonTreeTuned::UserCreateOutputObjects()
 }
 
 
-void AliAnalysisTaskUpsilonTreeTuned::UserExec(Option_t *)
+void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
 {
   // sparse that contains data about the dimuon data
   TTree* treeDimu=((TTree*)fOutput->At(0));
@@ -106,7 +101,7 @@ void AliAnalysisTaskUpsilonTreeTuned::UserExec(Option_t *)
   treeDimu->GetBranch("lowest_muon_transverse_momentum")->SetAddress(&fTreeData[kLowMomentumMuonpt]);
   treeDimu->GetBranch("enevt_centrality")->SetAddress(&fTreeData[kCentrality]);
 
-	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
+	//cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
 
 	AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
 	//cout<<eventInputHandler->IsEventSelected()<<endl;
@@ -116,46 +111,54 @@ void AliAnalysisTaskUpsilonTreeTuned::UserExec(Option_t *)
 		return;
 	} else cout<<"-> Accepted after applying physics selection";*/
 
-	if( !(InputEvent()->GetFiredTriggerClasses()).Contains("CMUL7-B-NOPF-MUFAST") ){
-		cout<<"-> Rejected because of trigger class selection."<<endl;
-		return;
-	} else {
-		cout<<"-> Accepted after applying trigger class selection";
-	}
+	// if( !(InputEvent()->GetFiredTriggerClasses()).Contains("CMUL7-B-NOPF-MUFAST") ){
+	// 	cout<<"-> Rejected because of trigger class selection."<<endl;
+	// 	return;
+	// } else {
+	// 	cout<<"-> Accepted after applying trigger class selection";
+	// }
 
   // reading how much tracks are stored in the input event and the event centrality
   Int_t ntracks=AliAnalysisMuonUtility::GetNTracks(InputEvent());
   AliMultSelection *multSelection = static_cast<AliMultSelection*>(InputEvent()->FindListObject("MultSelection"));
-  Float_t eventCentrality=multSelection->GetMultiplicityPercentile("V0M");
+  Float_t eventCentrality=0.;
+  if ( multSelection ) eventCentrality=multSelection->GetMultiplicityPercentile("V0M");
 
   // array containing all the found muons (eventually after cut apply)
   TObjArray *muonArray=new TObjArray();
 
   // loop over the tracks to store only muon ones to obtain every possible dimuon
   AliAODTrack* muonBuffer=0x0;
+  AliVParticle* muonBufferMC=0x0;
+  AliVParticle* motherBufferMC=0x0;
   for(Int_t itrack=0;itrack<ntracks;itrack++){
     muonBuffer=(AliAODTrack*)AliAnalysisMuonUtility::GetTrack(itrack,InputEvent());
 
-    // check if the track is seen in the muon tracker
-    if ( ! AliAnalysisMuonUtility::IsMuonTrack(muonBuffer) ) continue;
+    if ( ! fCuts->IsSelected(muonBuffer) ) continue;
 
-    // keep only low-pt matching tracks
-    if ( AliAnalysisMuonUtility::GetMatchTrigger(muonBuffer)<2 ) continue;
+    if( fIsMC ){ // if the analysed run is a MC run the macro excludes any particle not recognized as a muon from upsilon
+      Int_t mcDaughterIndex=muonBuffer->GetLabel();
+      Int_t mcMotherIndex=0;
 
-    // Rapidity acceptance cut.
-    if ( muonBuffer->Eta()<-4.0 || muonBuffer->Eta()>-2.5) {
-    	cout<<"Rejected (Eta)"<<endl;
-    	continue;
+      // check if there's any MC truth info related to the particle iTrack
+      if ( mcDaughterIndex<0 ) continue; // this particle has no MC truth information
+      else {
+        muonBufferMC=MCEvent()->GetTrack(mcDaughterIndex);
+
+        // check for particle identity
+        if ( TMath::Abs(muonBufferMC->PdgCode())!=13 ) continue; // this particle is not a muon
+        else {
+          //cout<<"It's a muon! Cheers!!!"<<endl;
+          mcMotherIndex=muonBufferMC->GetMother();
+          if ( mcMotherIndex<0 ) continue;
+          motherBufferMC=MCEvent()->GetTrack(mcMotherIndex);
+
+          // check for particle mother identity
+          if ( motherBufferMC->PdgCode()!=553 ) continue; // the mother of the studied particle is not a upsilon
+          //else //cout<<"And its mother is an Upsilon! Double cheers!!!"<<endl;
+        }
+      }
     }
-
-    // Rabs cut.
-    if ( muonBuffer->GetRAtAbsorberEnd()<17.6 || muonBuffer->GetRAtAbsorberEnd()>89.5) {
-    	cout<<"Rejected (Rabs)"<<endl;
-    	continue;
-    }
-
-    // is the track  selected via standard muon cuts?
-    //if ( ! fCuts->IsSelected(muonBuffer) ) continue;
 
     muonArray->Add((TObject*)muonBuffer);
 
@@ -164,7 +167,7 @@ void AliAnalysisTaskUpsilonTreeTuned::UserExec(Option_t *)
 
   Int_t entries=muonArray->GetEntries();
   Int_t treeEntries=treeDimu->GetEntries();
-  cout<<"-> "<<entries<<" muons correctly retrieved";
+  //cout<<"-> "<<entries<<" muons correctly retrieved";
 
   AliAODTrack *firstMuon=0x0;
   AliAODTrack *secondMuon=0x0;
@@ -181,7 +184,7 @@ void AliAnalysisTaskUpsilonTreeTuned::UserExec(Option_t *)
       secondMuon=(AliAODTrack*)muonArray->At(iSecondMuon);
 
       if (firstMuon->Charge()==secondMuon->Charge()) {
-      	cout<<"Rejected (like-sign)"<<endl;
+      	//cout<<"Rejected (like-sign)"<<endl;
       	continue;
       }
 
@@ -219,14 +222,14 @@ void AliAnalysisTaskUpsilonTreeTuned::UserExec(Option_t *)
   }
   delete muonArray;
 
-  cout<<"-> "<<treeDimu->GetEntries()-treeEntries<<" dimuons generated and saved."<<endl;
+  //cout<<"-> "<<treeDimu->GetEntries()-treeEntries<<" dimuons generated and saved."<<endl;
 
   PostData(1,fOutput);
 
   return;
 }
 
-void AliAnalysisTaskUpsilonTreeTuned::Terminate(Option_t *) {
+void AliAnalysisTaskUpsilonTree::Terminate(Option_t *) {
   fOutput=dynamic_cast<TList*>(GetOutputData(1));
 
   TTree* treeDimu=((TTree*)fOutput->At(0));

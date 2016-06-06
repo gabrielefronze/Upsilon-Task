@@ -9,10 +9,10 @@
 #include "AliAnalysisDataContainer.h"
 
 #include "AliMuonTrackCuts.h"
-#include "AliAnalysisTaskUpsilonTreeTuned.h"
+#include "AliAnalysisTaskUpsilonTree.h"
 #endif
 
-AliAnalysisTaskUpsilonTreeTuned* AddTaskUpsilonTree(Bool_t isMC = kFALSE, TString changeName = "")
+AliAnalysisTaskUpsilonTree* AddTaskUpsilonTree(Bool_t isMC, TString changeName = "")
 {
   AliAnalysisManager *mgr = AliAnalysisManager::GetAnalysisManager();
   if (!mgr) {
@@ -43,8 +43,8 @@ AliAnalysisTaskUpsilonTreeTuned* AddTaskUpsilonTree(Bool_t isMC = kFALSE, TStrin
   // Create task
   TString taskName = "UpsilonTask" + changeName;
   AliMuonTrackCuts *muonCuts = new AliMuonTrackCuts("cuts","cuts");
-  AliAnalysisTaskUpsilonTreeTuned *upsilonAnalysisTask = new AliAnalysisTaskUpsilonTreeTuned(taskName.Data(),muonCuts);
-  if ( isMC ) upsilonAnalysisTask->SetTrigClassPatterns("ANY");
+  AliAnalysisTaskUpsilonTree *upsilonAnalysisTask = new AliAnalysisTaskUpsilonTree(taskName.Data(),muonCuts,isMC);
+  //if ( isMC ) upsilonAnalysisTask->SetTrigClassPatterns("ANY");
   mgr->AddTask(upsilonAnalysisTask);
    // Connect containers
    mgr->ConnectInput  (upsilonAnalysisTask,  0, mgr->GetCommonInputContainer());

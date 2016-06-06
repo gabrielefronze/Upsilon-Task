@@ -238,8 +238,8 @@ void AliAnalysisTaskWeightedSpectrum::UserExec(Option_t *)
 
     TLorentzVector dimuon = AliAnalysisMuonUtility::GetTrackPair(firstMuon,secondMuon);
     //cout<<"dimuon created"<<endl;
-    Double_t rapidity1 = TMath::Abs(firstMuon->Eta());
-    Double_t rapidity2 = TMath::Abs(secondMuon->Eta());
+    Double_t rapidity1 = TMath::Abs(firstMuon->Y());
+    Double_t rapidity2 = TMath::Abs(secondMuon->Y());
     Int_t rapidityBin1 = fRapidityAxis->FindBin(rapidity1) - 1;
     Int_t rapidityBin2 = fRapidityAxis->FindBin(rapidity2) - 1;
 

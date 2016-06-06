@@ -19,9 +19,9 @@ class AliAnalysisTaskUpsilonTree : public AliAnalysisTaskSE
 {
   public:
     virtual void NotifyRun();
-    
+
     AliAnalysisTaskUpsilonTree();
-    AliAnalysisTaskUpsilonTree(const char *name, AliMuonTrackCuts *cuts);
+    AliAnalysisTaskUpsilonTree(const char *name, AliMuonTrackCuts *cuts, Bool_t isMC);
     virtual ~AliAnalysisTaskUpsilonTree();
 
     void UserCreateOutputObjects();
@@ -31,8 +31,6 @@ class AliAnalysisTaskUpsilonTree : public AliAnalysisTaskSE
     //Bool_t   MatchTriggerDigitsNBending  (AliVParticle *track, Int_t nbending,Int_t nnotbending) const;   //  Muon track matches trigger digits in nbending bending sides and nnotbending notbending sides
 
   private:
-    AliAODEvent* fAODEvent;
-    AliESDEvent* fESDEvent;
     TList *fOutput; //!<TList output object
     AliMuonTrackCuts *fCuts;
     ULong64_t fNEvents;
@@ -49,8 +47,9 @@ class AliAnalysisTaskUpsilonTree : public AliAnalysisTaskSE
     };
 
     Float_t *fTreeData;
-  
-  ClassDef(AliAnalysisTaskUpsilonTree,3);
+    Bool_t fIsMC;
+
+  ClassDef(AliAnalysisTaskUpsilonTree,4);
 };
 
 #endif

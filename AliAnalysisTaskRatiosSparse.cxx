@@ -174,7 +174,7 @@ void AliAnalysisTaskRatiosSparse::UserExec(Option_t *)
 
     //Double_t pt=muonBufferData->Pt();
 
-    sparseData[kRapidity]=(Double_t)-muonBufferData->Eta();
+    sparseData[kRapidity]=(Double_t)-muonBufferData->Y();
     sparseData[kPt]=(Double_t)muonBufferData->Pt();
     sparseData[kCentrality]=(Double_t)eventCentrality;
     //sparseData[kTriggerFlag]=(Double_t)AliAnalysisMuonUtility::GetMatchTrigger(muonBufferData);
