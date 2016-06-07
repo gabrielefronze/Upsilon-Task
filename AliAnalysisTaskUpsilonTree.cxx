@@ -83,7 +83,10 @@ void AliAnalysisTaskUpsilonTree::UserCreateOutputObjects()
   treeDimu->Branch("lowest_muon_transverse_momentum",&fTreeData[kLowMomentumMuonpt]);
   treeDimu->Branch("enevt_centrality",&fTreeData[kCentrality]);
 
+  TH1I *histoNEvents = new TH1I("NEvt","NEvt",1,0.,1.);
+
   fOutput->AddAt(treeDimu,0);
+  fOutput->AddAt(histoNEvents,1);
 
   PostData(1,fOutput);
 }
@@ -91,6 +94,10 @@ void AliAnalysisTaskUpsilonTree::UserCreateOutputObjects()
 
 void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
 {
+
+  TH1I *histoNEvents =(TH1I*)fOutput->At(1);
+  histoNEvents->Fill(0.5);
+  histoNEvents = 0x0;
   // sparse that contains data about the dimuon data
   TTree* treeDimu=((TTree*)fOutput->At(0));
   treeDimu->GetBranch("dimuon_momentum")->SetAddress(&fTreeData[kMomentum]);
@@ -101,7 +108,9 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
   treeDimu->GetBranch("lowest_muon_transverse_momentum")->SetAddress(&fTreeData[kLowMomentumMuonpt]);
   treeDimu->GetBranch("enevt_centrality")->SetAddress(&fTreeData[kCentrality]);
 
-	//cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
+	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
+
+  fTreeData=(Float_t*)malloc(kSparseDimension*sizeof(Float_t));
 
 	AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
 	//cout<<eventInputHandler->IsEventSelected()<<endl;
@@ -148,14 +157,14 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
         // check for particle identity
         if ( TMath::Abs(muonBufferMC->PdgCode())!=13 ) continue; // this particle is not a muon
         else {
-          //cout<<"It's a muon! Cheers!!!"<<endl;
+          cout<<"It's a muon! Cheers!!!"<<endl;
           mcMotherIndex=muonBufferMC->GetMother();
           if ( mcMotherIndex<0 ) continue;
           motherBufferMC=MCEvent()->GetTrack(mcMotherIndex);
 
           // check for particle mother identity
           if ( motherBufferMC->PdgCode()!=553 ) continue; // the mother of the studied particle is not a upsilon
-          //else //cout<<"And its mother is an Upsilon! Double cheers!!!"<<endl;
+          else cout<<"And its mother is an Upsilon! Double cheers!!!"<<endl;
         }
       }
     }
@@ -167,14 +176,14 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
 
   Int_t entries=muonArray->GetEntries();
   Int_t treeEntries=treeDimu->GetEntries();
-  //cout<<"-> "<<entries<<" muons correctly retrieved";
+
+  cout<<"##### "<<entries<<" muons correctly retrieved";
 
   AliAODTrack *firstMuon=0x0;
   AliAODTrack *secondMuon=0x0;
-  TLorentzVector dimuon;
   for(Int_t iFirstMuon=0; iFirstMuon<entries-1; iFirstMuon++){
     firstMuon=(AliAODTrack*)muonArray->At(iFirstMuon);
-    //cout<<"first muon "<<iFirstMuon<<endl;
+    cout<<"first muon "<<iFirstMuon<<endl;
     Double_t highestMuonp=0.;
     Double_t lowestMuonp=0.;
 
@@ -196,7 +205,7 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
         lowestMuonp=secondMuon->Pt();
       }
 
-      dimuon=AliAnalysisMuonUtility::GetTrackPair(firstMuon,secondMuon);
+      TLorentzVector dimuon=AliAnalysisMuonUtility::GetTrackPair(firstMuon,secondMuon);
       fTreeData[kMomentum]=dimuon.P();
       fTreeData[kTransverse]=dimuon.Pt();
       fTreeData[kRapidity]=dimuon.Rapidity();
@@ -205,8 +214,11 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
       fTreeData[kLowMomentumMuonpt]=lowestMuonp;
 		  fTreeData[kCentrality]=(Double_t)eventCentrality;
 
+      cout<<"FUUUUUUU"<<endl;
+
       //cout<<"Filling data"<<endl;
       if(fTreeData[kMass]>2.5)treeDimu->Fill();
+      cout<<"filled!"<<endl;
 
      	fTreeData[kMomentum]=0.;
       fTreeData[kTransverse]=0.;
