@@ -83,7 +83,7 @@ void AliAnalysisTaskUpsilonTree::UserCreateOutputObjects()
   treeDimu->Branch("lowest_muon_transverse_momentum",&fTreeData[kLowMomentumMuonpt]);
   treeDimu->Branch("enevt_centrality",&fTreeData[kCentrality]);
 
-  TH1I *histoNEvents = new TH1I("NEvt","NEvt",1,0.,1.);
+  TH1I *histoNEvents = new TH1I("NEvt","NEvt",1,0.,2.);
 
   fOutput->AddAt(treeDimu,0);
   fOutput->AddAt(histoNEvents,1);
@@ -95,8 +95,14 @@ void AliAnalysisTaskUpsilonTree::UserCreateOutputObjects()
 void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
 {
 
-  TH1I *histoNEvents =(TH1I*)fOutput->At(0));
-  histoNEvents->Fill(0.5);
+  TH1I *histoNEvents =(TH1I*)fOutput->At(1);
+  histoNEvents->Fill(1.);
+
+  fTreeData=(Float_t*)malloc(kSparseDimension*sizeof(Float_t));
+
+  for (size_t i = 0; i < kSparseDimension; i++) {
+    fTreeData[i]=0.;
+  }
 
   // sparse that contains data about the dimuon data
   TTree* treeDimu=((TTree*)fOutput->At(0));
@@ -108,11 +114,9 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
   treeDimu->GetBranch("lowest_muon_transverse_momentum")->SetAddress(&fTreeData[kLowMomentumMuonpt]);
   treeDimu->GetBranch("enevt_centrality")->SetAddress(&fTreeData[kCentrality]);
 
-	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++;
+	cout<<"Run:"<<InputEvent()->GetRunNumber()<<" Event:"<<fNEvents++<<endl;
 
-  fTreeData=(Float_t*)malloc(kSparseDimension*sizeof(Float_t));
-
-	AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
+	//AliInputEventHandler* eventInputHandler=((AliInputEventHandler*)(AliAnalysisManager::GetAnalysisManager()->GetInputEventHandler()));
 	//cout<<eventInputHandler->IsEventSelected()<<endl;
 /*	Bool_t isSelected = (eventInputHandler->IsEventSelected();// && AliVEvent::kMUON);
 	if ( !isSelected ){
@@ -157,14 +161,14 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
         // check for particle identity
         if ( TMath::Abs(muonBufferMC->PdgCode())!=13 ) continue; // this particle is not a muon
         else {
-          cout<<"It's a muon! Cheers!!!"<<endl;
+          // cout<<"It's a muon! Cheers!!!"<<endl;
           mcMotherIndex=muonBufferMC->GetMother();
           if ( mcMotherIndex<0 ) continue;
           motherBufferMC=MCEvent()->GetTrack(mcMotherIndex);
 
           // check for particle mother identity
           if ( motherBufferMC->PdgCode()!=553 ) continue; // the mother of the studied particle is not a upsilon
-          else cout<<"And its mother is an Upsilon! Double cheers!!!"<<endl;
+          // else cout<<"And its mother is an Upsilon! Double cheers!!!"<<endl;
         }
       }
     }
@@ -175,15 +179,14 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
   }
 
   Int_t entries=muonArray->GetEntries();
-  Int_t treeEntries=treeDimu->GetEntries();
 
-  cout<<"##### "<<entries<<" muons correctly retrieved";
+  // cout<<"##### "<<entries<<" muons correctly retrieved";
 
   AliAODTrack *firstMuon=0x0;
   AliAODTrack *secondMuon=0x0;
   for(Int_t iFirstMuon=0; iFirstMuon<entries-1; iFirstMuon++){
     firstMuon=(AliAODTrack*)muonArray->At(iFirstMuon);
-    cout<<"first muon "<<iFirstMuon<<endl;
+    // cout<<"first muon "<<iFirstMuon<<endl;
     Double_t highestMuonp=0.;
     Double_t lowestMuonp=0.;
 
@@ -208,25 +211,28 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
       TLorentzVector dimuon=AliAnalysisMuonUtility::GetTrackPair(firstMuon,secondMuon);
       fTreeData[kMomentum]=dimuon.P();
       fTreeData[kTransverse]=dimuon.Pt();
-      fTreeData[kRapidity]=dimuon.Rapidity();
+      fTreeData[kRapidity]=TMath::Abs(dimuon.Rapidity());
       fTreeData[kMass]=dimuon.M();
       fTreeData[kHighMomentumMuonpt]=highestMuonp;
       fTreeData[kLowMomentumMuonpt]=lowestMuonp;
 		  fTreeData[kCentrality]=(Double_t)eventCentrality;
 
-      cout<<"FUUUUUUU"<<endl;
+      cout<<endl;
+      cout<<fTreeData[kMomentum]<<endl;
+      cout<<fTreeData[kTransverse]<<endl;
+      cout<<fTreeData[kRapidity]<<endl;
+      cout<<fTreeData[kMass]<<endl;
+      cout<<fTreeData[kHighMomentumMuonpt]<<endl;
+      cout<<fTreeData[kLowMomentumMuonpt]<<endl;
+      cout<<fTreeData[kCentrality]<<endl;
+      cout<<endl;
+      cout<<endl;
+
+      // cout<<"FUUUUUUU"<<endl;
 
       //cout<<"Filling data"<<endl;
       if(fTreeData[kMass]>2.5)treeDimu->Fill();
-      cout<<"filled!"<<endl;
-
-     	fTreeData[kMomentum]=0.;
-      fTreeData[kTransverse]=0.;
-      fTreeData[kRapidity]=0.;
-      fTreeData[kMass]=0.;
-      fTreeData[kHighMomentumMuonpt]=0.;
-      fTreeData[kLowMomentumMuonpt]=0.;
-		  fTreeData[kCentrality]=0.;
+      // scout<<"filled!"<<endl;
       secondMuon=0x0;
     }
 
@@ -244,94 +250,111 @@ void AliAnalysisTaskUpsilonTree::UserExec(Option_t *)
 void AliAnalysisTaskUpsilonTree::Terminate(Option_t *) {
   fOutput=dynamic_cast<TList*>(GetOutputData(1));
 
+  TH1I *histoNEvents =(TH1I*)fOutput->At(1);
+  cout<<histoNEvents->IsA()->GetName()<<endl;
+  Double_t nEvents = (Double_t)histoNEvents->GetBinContent(1);
+  cout<<nEvents<<endl;
+
   TTree* treeDimu=((TTree*)fOutput->At(0));
-/*  treeDimu->GetBranch("dimuon_momentum")->SetAddress(&fTreeData[kMomentum]);
-  treeDimu->GetBranch("dimuon_transverse_momentum")->SetAddress(&fTreeData[kTransverse]);
-  treeDimu->GetBranch("dimuon_rapidity")->SetAddress(&fTreeData[kRapidity]);
-  treeDimu->GetBranch("dimuon_mass")->SetAddress(&fTreeData[kMass]);
-  treeDimu->GetBranch("highest_muon_transverse_momentum")->SetAddress(&fTreeData[kHighMomentumMuonpt]);
-  treeDimu->GetBranch("lowest_muon_transverse_momentum")->SetAddress(&fTreeData[kLowMomentumMuonpt]);
-  treeDimu->GetBranch("enevt_centrality")->SetAddress(&fTreeData[kCentrality]);*/
-
   TCanvas *canvHistos=new TCanvas("canvHistos","canvHistos");
-  canvHistos->Divide(2,3);
-/*  TH1D *massHisto=new TH1D("histo mass spectrum","histo mass spectrum",1000,2.5,17.);
-  treeDimu->Project("histo mass spectrum","dimuon_mass","enevt_centrality>0 & enevt_centrality<10");
-  massHisto->Draw();*/
+  //canvHistos->Divide(2,3);
+  canvHistos->Divide(3,1);
 
-  //TFile *fin=new TFile("RunRoberta.root","READ");
-  //TH1D *histoRoberta;
-  //fin->GetObject("hMassOS_2m",histoRoberta);
-  //histoRoberta->SetLineColor(kRed);
- // histoRoberta->SetLineStyle(3);
-  //histoRoberta->Rebin(2);
-
-///////////////////////////////////////////////////////////////////
   canvHistos->cd(1)->SetLogy();
-  TH1D *histoInvariantMass090FullRap=new TH1D("0%-90% 2.5<eta<4.0","0%-90% 2.5<eta<4.0",600,0.,15.);
- 	treeDimu->Project("0%-90% 2.5<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5");
-  histoInvariantMass090FullRap->ShowPeaks();
-  histoInvariantMass090FullRap->DrawClone();
-  //histoRoberta->DrawClone("same");
+  TH1D *massSpectrum1 = new TH1D("mass_spectrum_2.5-3.0","mass spectrum 2.5-3.0",300,0.,15.);
+  treeDimu->Project("mass_spectrum_2.5-3.0","dimuon_mass","dimuon_rapidity>2.5 && dimuon_rapidity<3.0");
+  // massSpectrum1->Scale(1./nEvents);
+  massSpectrum1->Draw();
 
-  //fin->Close();
+  canvHistos->cd(2)->SetLogy();
+  TH1D *massSpectrum2 = new TH1D("mass_spectrum_3.0-3.5","mass spectrum 3.0-3.5",300,0.,15.);
+  treeDimu->Project("mass_spectrum_3.0-3.5","dimuon_mass","dimuon_rapidity>3.0 && dimuon_rapidity<3.5");
+  // massSpectrum2->Scale(1./nEvents);
+  massSpectrum2->Draw();
 
-///////////////////////////////////////////////////////////////////
-  canvHistos->cd(2);
-/*  TGraph *graphRelative=new TGraph();
-  graphRelative->SetTitle("Relative variations");
-  graphRelative->SetName("Relative variations");
-  Double_t binWidth=histoRoberta->GetBinWidth(10);
-  Int_t tara=0;
-  for(Int_t iBin=1; iBin<histoInvariantMass090FullRap->GetNbinsX(); iBin++){
-    Double_t mine=histoInvariantMass090FullRap->GetBinContent(iBin);
-    Double_t roberta=histoRoberta->GetBinContent(iBin);
-    if (!(iBin*binWidth>2.5)) {
-      tara++;
-      continue;
-    }
-    if (roberta!=0.) graphRelative->SetPoint(iBin-1-tara,iBin*binWidth,-(mine-roberta)/roberta*100);
-    else graphRelative->SetPoint(iBin-1-tara,iBin*binWidth,0.);
+  canvHistos->cd(3)->SetLogy();
+  TH1D *massSpectrum3 = new TH1D("mass_spectrum_3.5-4.0","mass spectrum 3.5-4.0",300,0.,15.);
+  treeDimu->Project("mass_spectrum_3.5-4.0","dimuon_mass","dimuon_rapidity>3.5 && dimuon_rapidity<4.0");
+  // massSpectrum3->Scale(1./nEvents);
+  massSpectrum3->Draw();
 
-  }
-  graphRelative->Draw("ALP");
-  graphRelative->SetMarkerStyle(4);
-  graphRelative->SetLineColor(kGreen+2);
-  graphRelative->SetLineStyle(3);
-  graphRelative->SetMarkerColor(kGreen+3);
-  graphRelative->SetMarkerSize(0.15);*/
-  TH1D *histoInvariantMass=new TH1D("All entries","All entries",600,0.,15.);
-  treeDimu->Project("All entries","dimuon_mass");
-  histoInvariantMass->ShowPeaks();
-  histoInvariantMass->DrawClone();
-
-///////////////////////////////////////////////////////////////////
-	canvHistos->cd(3)->SetLogy();
-  TH1D *histoInvariantMass020FullRap=new TH1D("0%-20% 2.5<eta<4.0","0%-20% 2.5<eta<4.0",600,0.,15.);
- 	treeDimu->Project("0%-20% 2.5<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<20 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5");
-  histoInvariantMass020FullRap->ShowPeaks();
-  histoInvariantMass020FullRap->DrawClone();
-
-///////////////////////////////////////////////////////////////////
-	canvHistos->cd(4)->SetLogy();
-  TH1D *histoInvariantMass2090FullRap=new TH1D("20%-90% 2.5<eta<4.0","20%-90% 2.5<eta<4.0",600,0.,15.);
- 	treeDimu->Project("20%-90% 2.5<eta<4.0","dimuon_mass","enevt_centrality>20 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5");
-  histoInvariantMass2090FullRap->ShowPeaks();
-  histoInvariantMass2090FullRap->DrawClone();
-
-///////////////////////////////////////////////////////////////////
-	canvHistos->cd(5)->SetLogy();
-  TH1D *histoInvariantMass090SecondRap=new TH1D("0%-90% 2.5<eta<3.2","0%-90% 2.5<eta<3.2",600,0.,15.);
- 	treeDimu->Project("0%-90% 2.5<eta<3.2","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-3.2 && dimuon_rapidity<-2.5");
-  histoInvariantMass090SecondRap->ShowPeaks();
-  histoInvariantMass090SecondRap->DrawClone();
-
-///////////////////////////////////////////////////////////////////
-	canvHistos->cd(6)->SetLogy();
-  TH1D *histoInvariantMass090FirstRap=new TH1D("0%-90% 3.2<eta<4.0","0%-90% 3.2<eta<4.0",600,0.,15.);
- 	treeDimu->Project("0%-90% 3.2<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-3.2");
-  histoInvariantMass090FirstRap->ShowPeaks();
-  histoInvariantMass090FirstRap->DrawClone();
+// /*  TH1D *massHisto=new TH1D("histo mass spectrum","histo mass spectrum",1000,2.5,17.);
+//   treeDimu->Project("histo mass spectrum","dimuon_mass","enevt_centrality>0 & enevt_centrality<10");
+//   massHisto->Draw();*/
+//
+//   //TFile *fin=new TFile("RunRoberta.root","READ");
+//   //TH1D *histoRoberta;
+//   //fin->GetObject("hMassOS_2m",histoRoberta);
+//   //histoRoberta->SetLineColor(kRed);
+//  // histoRoberta->SetLineStyle(3);
+//   //histoRoberta->Rebin(2);
+//
+// ///////////////////////////////////////////////////////////////////
+//   canvHistos->cd(1)->SetLogy();
+//   TH1D *histoInvariantMass090FullRap=new TH1D("0%-90% 2.5<eta<4.0","0%-90% 2.5<eta<4.0",600,0.,15.);
+//  	treeDimu->Project("0%-90% 2.5<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5");
+//   histoInvariantMass090FullRap->ShowPeaks();
+//   histoInvariantMass090FullRap->DrawClone();
+//   //histoRoberta->DrawClone("same");
+//
+//   //fin->Close();
+//
+// ///////////////////////////////////////////////////////////////////
+//   canvHistos->cd(2);
+// /*  TGraph *graphRelative=new TGraph();
+//   graphRelative->SetTitle("Relative variations");
+//   graphRelative->SetName("Relative variations");
+//   Double_t binWidth=histoRoberta->GetBinWidth(10);
+//   Int_t tara=0;
+//   for(Int_t iBin=1; iBin<histoInvariantMass090FullRap->GetNbinsX(); iBin++){
+//     Double_t mine=histoInvariantMass090FullRap->GetBinContent(iBin);
+//     Double_t roberta=histoRoberta->GetBinContent(iBin);
+//     if (!(iBin*binWidth>2.5)) {
+//       tara++;
+//       continue;
+//     }
+//     if (roberta!=0.) graphRelative->SetPoint(iBin-1-tara,iBin*binWidth,-(mine-roberta)/roberta*100);
+//     else graphRelative->SetPoint(iBin-1-tara,iBin*binWidth,0.);
+//
+//   }
+//   graphRelative->Draw("ALP");
+//   graphRelative->SetMarkerStyle(4);
+//   graphRelative->SetLineColor(kGreen+2);
+//   graphRelative->SetLineStyle(3);
+//   graphRelative->SetMarkerColor(kGreen+3);
+//   graphRelative->SetMarkerSize(0.15);*/
+//   TH1D *histoInvariantMass=new TH1D("All entries","All entries",600,0.,15.);
+//   treeDimu->Project("All entries","dimuon_mass");
+//   histoInvariantMass->ShowPeaks();
+//   histoInvariantMass->DrawClone();
+//
+// ///////////////////////////////////////////////////////////////////
+// 	canvHistos->cd(3)->SetLogy();
+//   TH1D *histoInvariantMass020FullRap=new TH1D("0%-20% 2.5<eta<4.0","0%-20% 2.5<eta<4.0",600,0.,15.);
+//  	treeDimu->Project("0%-20% 2.5<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<20 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5");
+//   histoInvariantMass020FullRap->ShowPeaks();
+//   histoInvariantMass020FullRap->DrawClone();
+//
+// ///////////////////////////////////////////////////////////////////
+// 	canvHistos->cd(4)->SetLogy();
+//   TH1D *histoInvariantMass2090FullRap=new TH1D("20%-90% 2.5<eta<4.0","20%-90% 2.5<eta<4.0",600,0.,15.);
+//  	treeDimu->Project("20%-90% 2.5<eta<4.0","dimuon_mass","enevt_centrality>20 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-2.5");
+//   histoInvariantMass2090FullRap->ShowPeaks();
+//   histoInvariantMass2090FullRap->DrawClone();
+//
+// ///////////////////////////////////////////////////////////////////
+// 	canvHistos->cd(5)->SetLogy();
+//   TH1D *histoInvariantMass090SecondRap=new TH1D("0%-90% 2.5<eta<3.2","0%-90% 2.5<eta<3.2",600,0.,15.);
+//  	treeDimu->Project("0%-90% 2.5<eta<3.2","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-3.2 && dimuon_rapidity<-2.5");
+//   histoInvariantMass090SecondRap->ShowPeaks();
+//   histoInvariantMass090SecondRap->DrawClone();
+//
+// ///////////////////////////////////////////////////////////////////
+// 	canvHistos->cd(6)->SetLogy();
+//   TH1D *histoInvariantMass090FirstRap=new TH1D("0%-90% 3.2<eta<4.0","0%-90% 3.2<eta<4.0",600,0.,15.);
+//  	treeDimu->Project("0%-90% 3.2<eta<4.0","dimuon_mass","enevt_centrality>0 && enevt_centrality<90 && dimuon_rapidity>-4. && dimuon_rapidity<-3.2");
+//   histoInvariantMass090FirstRap->ShowPeaks();
+//   histoInvariantMass090FirstRap->DrawClone();
 
   cout << "**********************" << endl;
   cout << "* Analysis completed *" << endl;
