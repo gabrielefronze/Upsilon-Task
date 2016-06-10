@@ -1,7 +1,7 @@
 int runTaskTree (TString runMode="",TString analysisMode="",TString inputName="",TString inputOptions="",TString softVersions="",TString analysisOptions="",TString taskOptions=""){
 
-	runMode ="full";
-	analysisMode ="grid";
+	runMode ="terminate";
+	analysisMode ="local";
 	//inputName="/Users/Gabriele/cernbox/AlirootXcode/Upsilon/Task/AliAOD.Muons.root";
 	inputName ="/Users/Gabriele/cernbox/AlirootXcode/Upsilon/Task/MC_upsilon_modOCDB.txt";
 	//inputName ="Find;BasePath=/alice/cern.ch/user/g/gfronze/sim/LHC15o/upsilon/244982/;FileName=AliAOD.Muons.root;";

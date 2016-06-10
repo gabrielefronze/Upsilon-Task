@@ -330,6 +330,8 @@ void AliAnalysisTaskUpsilonTreeAEff::UserExec(Option_t *)
 void AliAnalysisTaskUpsilonTreeAEff::Terminate(Option_t *) {
   fOutput=dynamic_cast<TList*>(GetOutputData(1));
 
+  TFile *outputFile = new TFile("Axe.root","UPDATE");
+
   TH1I *histoNEvents =(TH1I*)fOutput->At(1);
   cout<<histoNEvents->IsA()->GetName()<<endl;
   Double_t nEvents = (Double_t)histoNEvents->GetBinContent(1);
@@ -339,32 +341,42 @@ void AliAnalysisTaskUpsilonTreeAEff::Terminate(Option_t *) {
   canvHistos->Divide(2,1);
 
   canvHistos->cd(1);
-  TTree* treeDimu=((TTree*)fOutput->At(0));
-  cout<<treeDimu->GetEntries()<<endl;
-  TH1D *rapiditySpectrum1 = new TH1D("rapidity_distribution_2.5-4.0_Data","Rapidity distribution 2.5<#eta<4.0",3,2.5,4.0);
-  // rapiditySpectrum1->Sumw2(kTRUE);
-  treeDimu->Project("rapidity_distribution_2.5-4.0_Data","dimuon_rapidity","dimuon_rapidity>2.5 && dimuon_rapidity<4.0");
-  rapiditySpectrum1->Draw("E");
-
-  canvHistos->cd(1);
   TTree* treeDimuMC=((TTree*)fOutput->At(2));
   cout<<treeDimuMC->GetEntries()<<endl;
   TH1D *rapiditySpectrumMC1 = new TH1D("rapidity_distribution_2.5-4.0_MC","Rapidity distribution 2.5<#eta<4.0",3,2.5,4.0);
   // rapiditySpectrumMC1->Sumw2(kTRUE);
   treeDimuMC->Project("rapidity_distribution_2.5-4.0_MC","dimuon_rapidity","dimuon_rapidity>2.5 && dimuon_rapidity<4.0");
+  rapiditySpectrumMC1->GetYaxis()->SetRangeUser(0., rapiditySpectrumMC1->GetMaximum()*1.1);
   rapiditySpectrumMC1->SetLineColor(kRed);
-  rapiditySpectrumMC1->Draw("SAME E");
+  rapiditySpectrumMC1->Draw("E");
+
+  outputFile->cd();
+  rapiditySpectrumMC1->Write();
+
+  canvHistos->cd(1);
+  TTree* treeDimu=((TTree*)fOutput->At(0));
+  cout<<treeDimu->GetEntries()<<endl;
+  TH1D *rapiditySpectrum1 = new TH1D("rapidity_distribution_2.5-4.0_Data","Rapidity distribution 2.5<#eta<4.0",3,2.5,4.0);
+  // rapiditySpectrum1->Sumw2(kTRUE);
+  treeDimu->Project("rapidity_distribution_2.5-4.0_Data","dimuon_rapidity","dimuon_rapidity>2.5 && dimuon_rapidity<4.0");
+  rapiditySpectrum1->Draw("SAME E");
+
+  outputFile->cd();
+  rapiditySpectrum1->Write();
 
   canvHistos->cd(2);
-  TH1D *ratio1 = (TH1D*)rapiditySpectrumMC1->Clone();
+  TH1D *ratio1 = (TH1D*)rapiditySpectrum1->Clone();
   ratio1->SetName("ratio1");
-  ratio1->SetTitle("Ratio = #frac{Counts_{MC truth}-Counts_{Data}}{Counts_{Data}} 2.5<#eta<4.0");
+  ratio1->SetTitle("A#times#epsilon");//#frac{Counts_{MC truth}-Counts_{Data}}{Counts_{Data}} 2.5<#eta<4.0");
   ratio1->GetYaxis()->SetTitle("Ratio");
-  ratio1->Add(rapiditySpectrum1, -1.);
-  ratio1->Divide(rapiditySpectrum1);
+  //ratio1->Add(rapiditySpectrum1, -1.);
+  ratio1->Divide(rapiditySpectrumMC1);
   ratio1->SetLineWidth(1);
   ratio1->SetLineColor(kBlack);
   ratio1->Draw("E");
+
+  outputFile->cd();
+  ratio1->Write();
 
   cout << "**********************" << endl;
   cout << "* Analysis completed *" << endl;
