@@ -28,7 +28,11 @@ void AxEffSyst(TString modOCDBOutputPath, TString stdOCDBOutputPath){
   axEffStdOCDBHisto->GetXaxis()->SetTitle("Rapidity");
   axEffStdOCDBHisto->GetYaxis()->SetTitle("A#times#epsilon");
 
+  axEffModOCDBHisto->Sumw2(kTRUE);
+  axEffStdOCDBHisto->Sumw2(kTRUE);
+
   TH1D *ratio = (TH1D*)axEffModOCDBHisto->Clone();
+  ratio->Sumw2(kTRUE);
   ratio->SetLineWidth(1);
   ratio->Add(axEffStdOCDBHisto, -1.);
   ratio->Divide(axEffStdOCDBHisto);

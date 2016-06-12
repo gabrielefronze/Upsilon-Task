@@ -212,10 +212,10 @@ void AliAnalysisTaskUpsilonTreeAEff::UserExec(Option_t *)
 
     fTreeData[kMomentum]=dimuon.P();
     fTreeData[kTransverse]=dimuon.Pt();
-    fTreeData[kRapidity]=TMath::Abs(dimuon.Y());
+    fTreeData[kRapidity]=TMath::Abs(dimuon.Rapidity());
     fTreeData[kMass]=dimuon.M();
-    fTreeData[kHighMomentumMuonpt]=0.;
-    fTreeData[kLowMomentumMuonpt]=0.;
+    fTreeData[kHighMomentumMuonpt]=firstMuon->Pt();
+    fTreeData[kLowMomentumMuonpt]=secondMuon->Pt();
     fTreeData[kCentrality]=(Double_t)eventCentrality;
 
     treeDimu->Fill();
@@ -274,9 +274,10 @@ void AliAnalysisTaskUpsilonTreeAEff::UserExec(Option_t *)
 
     if ( firstD < 0 ) continue;
 
-    for ( Int_t iDau=firstD; iDau<secondD; iDau++ ){
+    for ( Int_t iDau=firstD; iDau<=secondD; iDau++ ){
       muBuffer=MCEvent()->GetTrack(iDau);
       if ( TMath::Abs(muBuffer->PdgCode()) == 13 ){
+        cout<<"muon charge "<<muBuffer->Charge()<<endl;
         if ( muBuffer->Charge()>0. ) firstMuonMC = MCEvent()->GetTrack(iDau);
         if ( muBuffer->Charge()<0. ) secondMuonMC = MCEvent()->GetTrack(iDau);
       }
@@ -285,11 +286,11 @@ void AliAnalysisTaskUpsilonTreeAEff::UserExec(Option_t *)
     if ( !firstMuonMC || !secondMuonMC ) continue;
 
     cout<<firstMuonMC->Eta()<<endl;
-    if ( firstMuonMC->Eta()<-4.0 || firstMuonMC->Eta()>-2.5 ) continue;
+    //if ( firstMuonMC->Eta()<-4.0 || firstMuonMC->Eta()>-2.5 ) continue;
     cout<<"OK1"<<endl;
 
     cout<<secondMuonMC->Eta()<<endl;
-    if ( secondMuonMC->Eta()<-4.0 || secondMuonMC->Eta()>-2.5 ) continue;
+    //if ( secondMuonMC->Eta()<-4.0 || secondMuonMC->Eta()>-2.5 ) continue;
     cout<<"OK2"<<endl;
 
     // if ( !fCuts->IsSelected(firstMuonMC) || !fCuts->IsSelected(secondMuonMC) ) continue;
@@ -298,11 +299,12 @@ void AliAnalysisTaskUpsilonTreeAEff::UserExec(Option_t *)
     fTreeData[kTransverse]=dimuonBuffer->Pt();
     fTreeData[kRapidity]=TMath::Abs(dimuonBuffer->Y());
     fTreeData[kMass]=dimuonBuffer->M();
-    fTreeData[kHighMomentumMuonpt]=0.;
-    fTreeData[kLowMomentumMuonpt]=0.;
+    fTreeData[kHighMomentumMuonpt]=firstMuonMC->Pt();
+    fTreeData[kLowMomentumMuonpt]=secondMuonMC->Pt();
     fTreeData[kCentrality]=(Double_t)eventCentrality;
 
     treeDimuMC->Fill();
+    cout<<"filled MC!"<<endl;
 
     cout<<endl;
     cout<<fTreeData[kMomentum]<<endl;
@@ -315,7 +317,6 @@ void AliAnalysisTaskUpsilonTreeAEff::UserExec(Option_t *)
     cout<<endl;
     cout<<endl;
 
-    cout<<"filled MC!"<<endl;
     firstMuonMC = 0x0;
     secondMuonMC = 0x0;
   }
@@ -364,8 +365,12 @@ void AliAnalysisTaskUpsilonTreeAEff::Terminate(Option_t *) {
   outputFile->cd();
   rapiditySpectrum1->Write();
 
+  rapiditySpectrum1->Sumw2(kTRUE);
+  rapiditySpectrumMC1->Sumw2(kTRUE);
+
   canvHistos->cd(2);
   TH1D *ratio1 = (TH1D*)rapiditySpectrum1->Clone();
+  ratio1->Sumw2(kTRUE);
   ratio1->SetName("ratio1");
   ratio1->SetTitle("A#times#epsilon");//#frac{Counts_{MC truth}-Counts_{Data}}{Counts_{Data}} 2.5<#eta<4.0");
   ratio1->GetYaxis()->SetTitle("Ratio");
