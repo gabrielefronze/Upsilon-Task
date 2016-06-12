@@ -31,13 +31,13 @@ void AxEffSyst(TString modOCDBOutputPath, TString stdOCDBOutputPath){
   axEffModOCDBHisto->Sumw2(kTRUE);
   axEffStdOCDBHisto->Sumw2(kTRUE);
 
-  TH1D *ratio = (TH1D*)axEffModOCDBHisto->Clone();
+  TH1D *ratio = (TH1D*)axEffStdOCDBHisto->Clone();
   ratio->Sumw2(kTRUE);
   ratio->SetLineWidth(1);
-  ratio->Add(axEffStdOCDBHisto, -1.);
+  ratio->Add(axEffModOCDBHisto, -1.);
   ratio->Divide(axEffStdOCDBHisto);
   ratio->SetLineColor(kBlack);
-  ratio->SetTitle("#frac{A#times#epsilon_{Mod OCDB}-A#times#epsilon_{Std OCDB}}{A#times#epsilon_{Std OCDB}}");
+  ratio->SetTitle("#frac{A#times#epsilon_{Std OCDB}-A#times#epsilon_{Mod OCDB}}{A#times#epsilon_{Std OCDB}}");
   ratio->GetXaxis()->SetTitle("Rapidity");
   ratio->GetYaxis()->SetTitle("Ratio (%)");
 

@@ -1,6 +1,6 @@
 int runTaskTree (TString runMode="",TString analysisMode="",TString inputName="",TString inputOptions="",TString softVersions="",TString analysisOptions="",TString taskOptions=""){
 
-	runMode ="merge";
+	runMode ="terminate";
 	analysisMode ="grid";
 	//inputName="/Users/Gabriele/cernbox/AlirootXcode/Upsilon/Task/AliAOD.Muons.root";
 	inputName ="/Users/Gabriele/cernbox/AlirootXcode/Upsilon/Task/MC_upsilon_modOCDB.txt";
@@ -16,7 +16,7 @@ int runTaskTree (TString runMode="",TString analysisMode="",TString inputName=""
   gROOT->LoadMacro(gSystem->ExpandPathName("$TASKDIR/runTaskUtilities.C"));
 
   //SetupAnalysis(runMode,analysisMode,inputName,inputOptions,softVersions,analysisOptions, "libPWGmuon.so AliAnalysisTaskUpsilonTreeAEff.cxx AddTaskUpsilonTreeAEff.C",". $ALICE_ROOT/include $ALICE_PHYSICS/include","UpsilonTaskOutputFullNoPDCAProof");
-	SetupAnalysis(runMode,analysisMode,inputName,inputOptions,softVersions,analysisOptions, "libPWGmuon.so AliAnalysisTaskUpsilonTreeAEff.cxx AddTaskUpsilonTreeAEff.C",". $ALICE_ROOT/include $ALICE_PHYSICS/include","MCStdAEff_nocut");
+	SetupAnalysis(runMode,analysisMode,inputName,inputOptions,softVersions,analysisOptions, "libPWGmuon.so AliAnalysisTaskUpsilonTreeAEff.cxx AddTaskUpsilonTreeAEff.C",". $ALICE_ROOT/include $ALICE_PHYSICS/include","MCModAEff_nocut");
 
 	if ( !analysisMode.Contains("local") ){
 		AliAnalysisAlien* plugin = static_cast<AliAnalysisAlien*>(AliAnalysisManager::GetAnalysisManager()->GetGridHandler()); // Uncomment it if you want to configure the plugin...
